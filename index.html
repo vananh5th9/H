@@ -2,10 +2,10 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Hệ Thống Xác Minh VIP</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -49,6 +49,11 @@
             text-align: center;
             position: relative;
             overflow: hidden;
+            transition: max-width 0.4s ease;
+        }
+
+        .app-box.admin-mode {
+            max-width: 500px;
         }
 
         .app-box::before {
@@ -98,7 +103,7 @@
             transition: 0.3s;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 16px 16px 16px 45px;
             border-radius: 14px;
@@ -111,7 +116,13 @@
             transition: all 0.3s ease;
         }
 
-        input:focus {
+        select {
+            padding-left: 20px;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        input:focus, select:focus {
             border-color: var(--primary);
             background: rgba(0, 0, 0, 0.4);
             box-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
@@ -119,24 +130,38 @@
 
         input:focus + i { color: var(--primary); }
 
-        button.btn-check {
-            width: 100%;
+        button {
             padding: 16px;
             border-radius: 14px;
             border: none;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: #030712;
             font-size: 1rem;
             font-weight: 700;
             letter-spacing: 0.5px;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        button.btn-check {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #030712;
             box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
         }
 
         button.btn-check:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 242, 254, 0.4);
+        }
+
+        button.btn-admin-toggle {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-sub);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: 25px;
+            width: 100%;
+            font-size: 0.85rem;
+            padding: 10px;
         }
 
         .error-box {
@@ -152,6 +177,7 @@
             animation: shake 0.4s ease;
         }
 
+        /* RESULT CARD */
         .result-card {
             margin-top: 25px;
             background: rgba(255, 255, 255, 0.02);
@@ -193,7 +219,6 @@
         }
 
         .info-row { margin-bottom: 12px; }
-
         .info-label {
             color: var(--text-sub);
             font-size: 0.8rem;
@@ -203,7 +228,6 @@
         }
 
         .info-value { font-size: 1.1rem; font-weight: 600; }
-
         .info-value.countdown {
             color: #f1c40f;
             font-family: monospace;
@@ -225,7 +249,6 @@
             padding: 15px;
             text-align: center;
             margin-bottom: 15px;
-            animation: fadeIn 0.5s ease;
         }
 
         .expired-text {
@@ -233,7 +256,6 @@
             font-size: 0.9rem;
             font-weight: 600;
             margin-bottom: 12px;
-            line-height: 1.4;
         }
 
         .btn-telegram {
@@ -248,19 +270,66 @@
             color: #ffffff;
             text-decoration: none;
             font-weight: 700;
-            font-size: 0.95rem;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
-            box-sizing: border-box;
-            animation: bounce 2s infinite;
+            transition: 0.3s;
         }
 
-        .btn-telegram:hover {
-            background: #0077b5;
-            box-shadow: 0 6px 20px rgba(0, 136, 204, 0.5);
-            transform: translateY(-2px);
+        /* ADMIN PANEL */
+        .admin-panel {
+            display: none;
+            text-align: left;
+            margin-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+            animation: slideUp 0.4s ease;
+        }
+
+        .admin-title {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .code-list {
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 14px;
+            padding: 15px;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .code-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+        }
+
+        .code-item:last-child {
+            border-bottom: none;
+        }
+
+        .code-item button {
+            padding: 6px 12px;
+            background: #ff3838;
+            color: white;
+            font-size: 0.75rem;
+            border-radius: 8px;
+            font-weight: 700;
+        }
+
+        .loader {
+            display: none;
+            color: var(--primary);
+            font-size: 0.9rem;
+            margin: 15px 0;
+            text-align: center;
         }
 
         @keyframes shake {
@@ -268,45 +337,39 @@
             25% { transform: translateX(-6px); }
             75% { transform: translateX(6px); }
         }
-
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         @keyframes pulse {
             0% { transform: scale(0.9); opacity: 0.6; }
             50% { transform: scale(1.2); opacity: 1; }
             100% { transform: scale(0.9); opacity: 0.6; }
         }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-5px); }
-            60% { transform: translateY(-3px); }
-        }
     </style>
 </head>
 <body>
 
-<div class="app-box">
+<div class="app-box" id="appBox">
     <div class="app-logo">
         <i class="fa-solid fa-shield-halved"></i>
     </div>
-    <h2>XÁC MINH VIP SYSTEM</h2>
-    <div class="subtitle">Nhập chính xác mã được cấp để kiểm tra trạng thái</div>
+    <h2 id="mainTitle">XÁC MINH VIP SYSTEM</h2>
+    <div class="subtitle" id="mainSubtitle">Nhập mã VIP được cấp để kiểm tra trạng thái hoạt động</div>
 
-    <div class="input-wrapper">
-        <input type="text" id="userInput" placeholder="(VIP BAN MUA) (ID TELE)">
-        <i class="fa-solid fa-key"></i>
+    <div id="userSection">
+        <div class="input-wrapper">
+            <input type="text" id="userInput" placeholder="Nhập mã VIP check tại đây...">
+            <i class="fa-solid fa-key"></i>
+        </div>
+        <button class="btn-check" onclick="processVerify()">KIỂM TRA NGAY</button>
     </div>
 
-    <button class="btn-check" onclick="processVerify()">KIỂM TRA NGAY</button>
-
+    <div class="loader" id="globalLoader">
+        <i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu từ Cloud...
+    </div>
     <div class="error-box" id="errorBox">
-        <i class="fa-solid fa-triangle-exclamation"></i>&nbsp; NỘI DUNG CỦA BẠN KHÔNG CÓ TRONG DỮ LIỆU
+        <i class="fa-solid fa-triangle-exclamation"></i> MÃ KHÔNG TỒN TẠI HOẶC CHƯA ĐƯỢC KÍCH HOẠT
     </div>
 
     <div class="result-card" id="resultCard">
@@ -316,66 +379,237 @@
                 <span class="status-dot"></span> ĐANG CHẠY
             </div>
         </div>
-
         <div class="info-row">
             <div class="info-label">Tài khoản check</div>
             <div class="info-value" id="resUser" style="color: #fff;"></div>
         </div>
-
         <div class="info-row" id="countdownRow">
             <div class="info-label">Thời gian còn lại</div>
             <div class="info-value countdown" id="resCountdown">--h --m --s</div>
         </div>
-
         <div class="expired-box" id="expiredBox">
-            <div class="expired-text">
-                ⚠️ Thời gian đã hết!<br>Vui lòng liên hệ Telegram bộ phận CSKH để nhận hoa hồng của bạn.
-            </div>
+            <div class="expired-text">⚠️ Thời gian nhận lợi nhuận đã hết! Vui lòng liên hệ hỗ trợ.</div>
             <a href="https://t.me/bossyennhi_997" target="_blank" class="btn-telegram">
-                <i class="fa-brands fa-telegram" style="font-size: 1.2rem;"></i> Liên Hệ @bossyennhi_997
+                <i class="fa-brands fa-telegram"></i> Liên Hệ Telegram @bossyennhi_997
             </a>
         </div>
-
         <div style="border-top: 1px dashed rgba(255,255,255,0.08); margin: 15px 0;"></div>
-
         <div class="info-row" style="margin-bottom: 0;">
             <div class="info-label">Lợi nhuận tích lũy thực tế</div>
             <div class="info-value profit" id="resProfit">0₫</div>
+        </div>
+    </div>
+
+    <button class="btn-admin-toggle" id="adminToggleBtn" onclick="toggleAdminView()">Đăng nhập Admin</button>
+
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-title"><i class="fa-solid fa-lock-open"></i> BẢNG ĐIỀU KHIỂN ADMIN</div>
+        
+        <div id="adminLoginForm">
+            <div class="input-wrapper">
+                <input type="password" id="adminPassword" placeholder="Nhập mật khẩu Admin...">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <button class="btn-check" onclick="verifyAdminLogin()">ĐĂNG NHẬP</button>
+        </div>
+
+        <div id="adminControl" style="display: none;">
+            <div class="info-label" style="margin-bottom: 8px;">1. Tên tài khoản mã VIP</div>
+            <div class="input-wrapper">
+                <input type="text" id="newCodeInput" placeholder="Ví dụ: VIP4 vananh_ctv">
+                <i class="fa-solid fa-plus"></i>
+            </div>
+            
+            <div class="info-label" style="margin-bottom: 8px;">2. Chọn thời hạn chạy</div>
+            <div class="input-wrapper">
+                <select id="timeDurationSelect" style="padding-left: 15px;">
+                    <option value="10m">10 Phút</option>
+                    <option value="30m">30 Phút</option>
+                    <option value="1h">1 Giờ</option>
+                    <option value="8h">8 Giờ</option>
+                    <option value="12h">12 Giờ</option>
+                    <option value="24h">24 Giờ</option>
+                </select>
+            </div>
+            
+            <button class="btn-check" onclick="createNewCode()">KÍCH HOẠT MÃ VIP NGAY</button>
+            
+            <div class="code-list" id="activeCodesContainer">
+                <div class="info-label" style="padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    Các mã VIP đang được kích hoạt
+                </div>
+                <div id="codeListContent"></div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
     // ==========================================
-    // KHU VỰC QUẢN LÝ DANH SÁCH USER HOẠT ĐỘNG
-    // Muốn thêm/sửa/bớt user, bạn chỉ cần chỉnh sửa danh sách này là xong!
+    // CẤU HÌNH API ĐỂ LƯU DỮ LIỆU ĐÁM MÂY (JSONBIN.IO)
     // ==========================================
-    const userDatabase = [
-        "VIP7 vananh_ctv",
-        "VIP6 anh",
-        "VIP1 anh"
-    ];
+    const JSONBIN_URL = 'https://api.jsonbin.io/v3/b/663ebd17ad19ca34f867fa23'; // <-- Thay Link Bin của bạn vào đây
+    const API_KEY = '$2a$10$C8bVq764Uo9B9fN1v/r38u/fJqbeCj0v6S62b4Yy6bW7eY9kQ9rGu';   // <-- Thay Master Key của bạn vào đây
+    
+    const ADMIN_PASSWORD = "xuanmai2011";
 
-    // ==========================================
-    // Cấu hình mốc tiền cho từng gói VIP
-    // ==========================================
     const vipTariffs = {
-        "VIP1": { start: 70000, total: 147000, hours: 24 },
-        "VIP2": { start: 150000, total: 315000, hours: 24 },
-        "VIP3": { start: 190000, total: 399000, hours: 24 },
-        "VIP4": { start: 210000, total: 441000, hours: 24 },
-        "VIP5": { start: 300000, total: 630000, hours: 24 },
-        "VIP6": { start: 500000, total: 1250000, hours: 24 },
-        "VIP7": { start: 800000, total: 2000000, hours: 24 }
+        "VIP1": { start: 70000, total: 147000 },
+        "VIP2": { start: 150000, total: 315000 },
+        "VIP3": { start: 190000, total: 399000 },
+        "VIP4": { start: 210000, total: 441000 },
+        "VIP5": { start: 300000, total: 630000 },
+        "VIP6": { start: 500000, total: 1250000 },
+        "VIP7": { start: 800000, total: 2000000 }
     };
 
     let liveInterval = null;
+    let isAdminLoggedIn = false;
+
+    function parseDurationToMs(durationStr) {
+        const value = parseInt(durationStr);
+        if (durationStr.includes('m')) return value * 60 * 1000;
+        if (durationStr.includes('h')) return value * 60 * 60 * 1000;
+        return 0;
+    }
 
     function formatVND(amount) {
         return Math.floor(amount).toLocaleString('vi-VN') + "₫";
     }
 
-    function processVerify() {
+    // TẢI DỮ LIỆU TỪ MÁY CHỦ CLOUD
+    async function fetchCloudCodes() {
+        showLoader(true);
+        try {
+            const res = await fetch(JSONBIN_URL, {
+                headers: { 'X-Master-Key': API_KEY }
+            });
+            const data = await res.json();
+            showLoader(false);
+            return data.record.codes || {};
+        } catch (e) {
+            console.error(e);
+            showLoader(false);
+            return {};
+        }
+    }
+
+    // LƯU DỮ LIỆU LÊN MÁY CHỦ CLOUD
+    async function saveCloudCodes(codesObj) {
+        showLoader(true);
+        try {
+            const res = await fetch(JSONBIN_URL, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': API_KEY
+                },
+                body: JSON.stringify({ codes: codesObj })
+            });
+            showLoader(false);
+            return res.ok;
+        } catch (e) {
+            console.error(e);
+            showLoader(false);
+            return false;
+        }
+    }
+
+    function showLoader(show) {
+        document.getElementById('globalLoader').style.display = show ? 'block' : 'none';
+    }
+
+    // HIỂN THỊ / ẨN PHẦN ĐĂNG NHẬP ADMIN
+    function toggleAdminView() {
+        const panel = document.getElementById('adminPanel');
+        const btn = document.getElementById('adminToggleBtn');
+        const appBox = document.getElementById('appBox');
+
+        if (panel.style.display === 'block') {
+            panel.style.display = 'none';
+            appBox.classList.remove('admin-mode');
+            btn.innerText = 'Đăng nhập Admin';
+        } else {
+            panel.style.display = 'block';
+            appBox.classList.add('admin-mode');
+            btn.innerText = 'Đóng Admin';
+        }
+    }
+
+    // KIỂM TRA MẬT KHẨU ĐĂNG NHẬP ADMIN
+    function verifyAdminLogin() {
+        const pwd = document.getElementById('adminPassword').value;
+        if (pwd === ADMIN_PASSWORD) {
+            isAdminLoggedIn = true;
+            document.getElementById('adminLoginForm').style.display = 'none';
+            document.getElementById('adminControl').style.display = 'block';
+            renderAdminCodesList();
+        } else {
+            alert('Mật khẩu Admin không đúng!');
+        }
+    }
+
+    // ADMIN: TẠO VÀ KÍCH HOẠT MÃ NGAY LẬP TỨC
+    async function createNewCode() {
+        const newCode = document.getElementById('newCodeInput').value.trim();
+        const duration = document.getElementById('timeDurationSelect').value;
+
+        if (!newCode) return alert('Vui lòng nhập tên mã VIP!');
+
+        const codes = await fetchCloudCodes();
+        
+        // Ghi lại mốc thời gian kích hoạt bằng đồng hồ thực tế của đám mây
+        codes[newCode] = {
+            duration: duration,
+            activatedAt: Date.now() 
+        };
+
+        const success = await saveCloudCodes(codes);
+        if (success) {
+            alert(`Đã kích hoạt thành công mã "${newCode}" với thời hạn ${duration}!`);
+            document.getElementById('newCodeInput').value = '';
+            renderAdminCodesList();
+        } else {
+            alert('Gặp lỗi khi đồng bộ lên Cloud.');
+        }
+    }
+
+    // ADMIN: XÓA MÃ VIP KHỎI HỆ THỐNG
+    async function deleteCode(codeKey) {
+        if (!confirm(`Bạn có chắc muốn xóa mã VIP: ${codeKey}?`)) return;
+        const codes = await fetchCloudCodes();
+        delete codes[codeKey];
+        const success = await saveCloudCodes(codes);
+        if (success) {
+            renderAdminCodesList();
+        }
+    }
+
+    // ADMIN: IN DANH SÁCH MÃ HOẠT ĐỘNG RA BẢNG ĐIỀU KHIỂN
+    async function renderAdminCodesList() {
+        const codes = await fetchCloudCodes();
+        const container = document.getElementById('codeListContent');
+        container.innerHTML = '';
+
+        const keys = Object.keys(codes);
+        if (keys.length === 0) {
+            container.innerHTML = '<div style="font-size:0.8rem; color:var(--text-sub); text-align:center; padding:15px 0;">Không có mã nào đang hoạt động.</div>';
+            return;
+        }
+
+        keys.forEach(code => {
+            const item = document.createElement('div');
+            item.className = 'code-item';
+            item.innerHTML = `
+                <span><strong>${code}</strong> (${codes[code].duration})</span>
+                <button onclick="deleteCode('${code}')">Xóa mã</button>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    // USER: CHECK MÃ VIP
+    async function processVerify() {
         const inputVal = document.getElementById('userInput').value.trim();
         const errorBox = document.getElementById('errorBox');
         const resultCard = document.getElementById('resultCard');
@@ -384,25 +618,29 @@
         const statusBadge = document.getElementById('statusBadge');
 
         if (liveInterval) clearInterval(liveInterval);
+        errorBox.style.display = 'none';
 
-        // 1. Kiểm tra trực tiếp tại danh sách trong mảng userDatabase ở trên
-        if (!userDatabase.includes(inputVal)) {
+        // Tải danh sách mã từ đám mây về để so sánh
+        const activeCodes = await fetchCloudCodes();
+
+        // 1. Kiểm tra sự tồn tại của mã
+        if (!activeCodes[inputVal]) {
             errorBox.style.display = 'block';
             resultCard.style.display = 'none';
             return;
         }
 
-        // 2. Phân tách loại VIP
+        const codeData = activeCodes[inputVal];
         const vipType = inputVal.split(' ')[0].toUpperCase();
         const config = vipTariffs[vipType];
 
+        // Nếu mã nhập vào không đúng cú pháp VIP (Ví dụ không bắt đầu bằng VIP1 -> VIP7)
         if (!config) {
             errorBox.style.display = 'block';
             resultCard.style.display = 'none';
             return;
         }
 
-        errorBox.style.display = 'none';
         resultCard.style.display = 'block';
         countdownRow.style.display = 'block';
         expiredBox.style.display = 'none';
@@ -414,23 +652,17 @@
 
         document.getElementById('resUser').innerText = inputVal;
 
-        // 3. Xử lý bộ nhớ đếm ngược
-        const storageKey = 'activation_' + inputVal;
-        let expireTimestamp = localStorage.getItem(storageKey);
+        // Tính mốc thời gian hết hạn dựa trên lúc Admin bấm kích hoạt
+        const activatedAt = parseInt(codeData.activatedAt);
+        const totalDurationMs = parseDurationToMs(codeData.duration);
+        const expireTimestamp = activatedAt + totalDurationMs;
 
-        if (!expireTimestamp) {
-            const msDuration = config.hours * 60 * 60 * 1000;
-            expireTimestamp = Date.now() + msDuration;
-            localStorage.setItem(storageKey, expireTimestamp);
-        } else {
-            expireTimestamp = parseInt(expireTimestamp);
-        }
-
-        // 4. Khởi chạy bộ đếm thực tế
+        // 2. Chạy đếm ngược thời gian thực (Đồng bộ tuyệt đối từ lúc Admin kích hoạt)
         liveInterval = setInterval(() => {
             const now = Date.now();
             const msRemaining = expireTimestamp - now;
 
+            // Nếu đã hết thời gian chạy
             if (msRemaining <= 0) {
                 countdownRow.style.display = 'none';
                 expiredBox.style.display = 'block';
@@ -442,16 +674,17 @@
                 return;
             }
 
+            // Quy đổi sang H, M, S
             const hours = Math.floor(msRemaining / (3600 * 1000));
             const mins = Math.floor((msRemaining % (3600 * 1000)) / (60 * 1000));
             const secs = Math.floor((msRemaining % (60 * 1000)) / 1000);
 
             document.getElementById('resCountdown').innerText = `${hours}h ${mins}m ${secs}s`;
 
-            const totalMs = config.hours * 60 * 60 * 1000;
-            const msPassed = totalMs - msRemaining;
+            // Tính toán số tiền nhảy tự động từ lúc bắt đầu kích hoạt cho đến khi hết hạn
+            const msPassed = now - activatedAt;
             const profitRange = config.total - config.start;
-            const moneyIncreases = config.start + (profitRange * (msPassed / totalMs));
+            const moneyIncreases = config.start + (profitRange * (msPassed / totalDurationMs));
 
             document.getElementById('resProfit').innerText = formatVND(moneyIncreases);
 
