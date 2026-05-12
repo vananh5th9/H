@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Hệ Thống Xác Minh VIP</title>
+    <title>Hệ Thống Quét Trùng Ảnh</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -18,11 +18,10 @@
             --neon-red: #ff3838;
             --text-main: #f1f2f6;
             --text-sub: #a4b0be;
-            --telegram-color: #0088cc;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-glow);
             background-image: 
                 radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.05) 0%, transparent 40%),
@@ -41,19 +40,13 @@
             background: var(--card-bg);
             border: 1px solid rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(20px);
-            padding: 35px 30px;
+            padding: 30px;
             border-radius: 24px;
             width: 100%;
-            max-width: 440px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
             text-align: center;
             position: relative;
-            overflow: hidden;
-            transition: max-width 0.4s ease;
-        }
-
-        .app-box.admin-mode {
-            max-width: 500px;
         }
 
         .app-box::before {
@@ -62,7 +55,7 @@
             top: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 50%;
+            width: 60%;
             height: 2px;
             background: linear-gradient(90deg, transparent, var(--primary), transparent);
         }
@@ -76,619 +69,318 @@
         }
 
         h2 {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            margin: 0 0 8px 0;
+            margin: 0 0 25px 0;
             letter-spacing: 0.5px;
         }
 
-        .subtitle {
-            font-size: 0.85rem;
-            color: var(--text-sub);
-            margin-bottom: 30px;
-        }
-
-        .input-wrapper {
-            position: relative;
+        .upload-area {
+            border: 2px dashed rgba(0, 242, 254, 0.3);
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 35px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             margin-bottom: 20px;
         }
 
-        .input-wrapper i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-sub);
-            font-size: 1.1rem;
-            transition: 0.3s;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 16px 16px 16px 45px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 0, 0, 0.2);
-            color: var(--text-main);
-            font-size: 1rem;
-            box-sizing: border-box;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        select {
-            padding-left: 20px;
-            appearance: none;
-            cursor: pointer;
-        }
-
-        input:focus, select:focus {
+        .upload-area:hover {
             border-color: var(--primary);
-            background: rgba(0, 0, 0, 0.4);
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
+            background: rgba(0, 242, 254, 0.03);
         }
 
-        input:focus + i { color: var(--primary); }
-
-        button {
-            padding: 16px;
-            border-radius: 14px;
-            border: none;
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        button.btn-check {
-            width: 100%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: #030712;
-            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
-        }
-
-        button.btn-check:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.4);
-        }
-
-        button.btn-admin-toggle {
-            background: rgba(255, 255, 255, 0.04);
+        .upload-area i {
+            font-size: 2.3rem;
             color: var(--text-sub);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            margin-top: 25px;
-            width: 100%;
-            font-size: 0.85rem;
-            padding: 10px;
+            margin-bottom: 10px;
         }
 
-        .error-box {
-            background: rgba(255, 56, 56, 0.1);
-            border: 1px solid rgba(255, 56, 56, 0.2);
-            color: #ff4d4d;
+        .upload-area p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        #fileInput { display: none; }
+
+        /* THÔNG BÁO HỢP LỆ (NGẮN GỌN) */
+        .status-success-box {
+            display: none;
+            background: rgba(57, 255, 20, 0.1);
+            border: 1px solid rgba(57, 255, 20, 0.2);
+            color: var(--neon-green);
             padding: 12px;
-            border-radius: 10px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
             margin-top: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: none;
-            animation: shake 0.4s ease;
+            animation: fadeIn 0.3s ease;
         }
 
-        /* RESULT CARD */
-        .result-card {
-            margin-top: 25px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 20px;
+        /* CHI TIẾT ẢNH TRÙNG LẶP */
+        .scan-result-container {
+            margin-top: 20px;
+            display: none;
             text-align: left;
-            display: none;
-            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: fadeIn 0.3s ease;
         }
 
-        .result-header {
+        .result-item {
+            background: rgba(255, 56, 56, 0.08);
+            border: 1px solid rgba(255, 56, 56, 0.2);
+            border-radius: 14px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .result-item img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 56, 56, 0.3);
+        }
+
+        .result-info { flex-grow: 1; }
+
+        .result-status {
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 6px;
+            background: rgba(255, 56, 56, 0.2);
+            color: var(--neon-red);
+            border: 1px solid rgba(255, 56, 56, 0.3);
+            white-space: nowrap;
+        }
+
+        /* LỊCH SỬ RÚT GỌN */
+        .history-section {
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 20px;
+            text-align: left;
+        }
+
+        .history-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding-bottom: 12px;
-            margin-bottom: 15px;
-        }
-
-        .status-badge {
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: var(--neon-green);
-            background: rgba(57, 255, 20, 0.1);
-            padding: 4px 10px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--neon-green);
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-
-        .info-row { margin-bottom: 12px; }
-        .info-label {
-            color: var(--text-sub);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        .info-value { font-size: 1.1rem; font-weight: 600; }
-        .info-value.countdown {
-            color: #f1c40f;
-            font-family: monospace;
-            font-size: 1.3rem;
-        }
-
-        .info-value.profit {
-            color: var(--neon-green);
-            font-size: 1.5rem;
-            font-weight: 800;
-            text-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
-        }
-
-        .expired-box {
-            display: none;
-            background: rgba(241, 196, 15, 0.05);
-            border: 1px dashed rgba(241, 196, 15, 0.3);
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .expired-text {
-            color: #f1c40f;
-            font-size: 0.9rem;
-            font-weight: 600;
             margin-bottom: 12px;
         }
 
-        .btn-telegram {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            background: var(--telegram-color);
-            color: #ffffff;
-            text-decoration: none;
+        .history-title {
+            font-size: 0.85rem;
             font-weight: 700;
-            transition: 0.3s;
+            color: var(--text-sub);
+            text-transform: uppercase;
         }
 
-        /* ADMIN PANEL */
-        .admin-panel {
-            display: none;
-            text-align: left;
-            margin-top: 25px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 20px;
-            animation: slideUp 0.4s ease;
+        .btn-clear {
+            background: transparent;
+            color: #ff4d4d;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
         }
 
-        .admin-title {
-            color: var(--primary);
-            font-weight: 700;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .btn-clear:hover { text-decoration: underline; }
 
-        .code-list {
-            margin-top: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 14px;
-            padding: 15px;
-            max-height: 250px;
+        .history-list {
+            max-height: 140px;
             overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            padding: 8px 12px;
         }
 
-        .code-item {
+        .history-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.9rem;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-size: 0.8rem;
+            color: rgba(241, 242, 246, 0.6);
         }
 
-        .code-item:last-child {
-            border-bottom: none;
-        }
-
-        .code-item button {
-            padding: 6px 12px;
-            background: #ff3838;
-            color: white;
-            font-size: 0.75rem;
-            border-radius: 8px;
-            font-weight: 700;
-        }
+        .history-item:last-child { border-bottom: none; }
 
         .loader {
             display: none;
             color: var(--primary);
             font-size: 0.9rem;
             margin: 15px 0;
-            text-align: center;
         }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-6px); }
-            75% { transform: translateX(6px); }
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(15px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse {
-            0% { transform: scale(0.9); opacity: 0.6; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(0.9); opacity: 0.6; }
         }
     </style>
 </head>
 <body>
 
-<div class="app-box" id="appBox">
+<div class="app-box">
     <div class="app-logo">
-        <i class="fa-solid fa-shield-halved"></i>
+        <i class="fa-solid fa-eye"></i>
     </div>
-    <h2 id="mainTitle">XÁC MINH VIP SYSTEM</h2>
-    <div class="subtitle" id="mainSubtitle">Nhập mã VIP được cấp để kiểm tra trạng thái hoạt động</div>
+    <h2>KIỂM TRA TRÙNG ẢNH</h2>
 
-    <div id="userSection">
-        <div class="input-wrapper">
-            <input type="text" id="userInput" placeholder="Nhập mã VIP check tại đây...">
-            <i class="fa-solid fa-key"></i>
-        </div>
-        <button class="btn-check" onclick="processVerify()">KIỂM TRA NGAY</button>
+    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+        <i class="fa-solid fa-images"></i>
+        <p>Chọn hoặc kéo thả ảnh vào đây để quét</p>
     </div>
+    <input type="file" id="fileInput" accept="image/*" multiple onchange="handleImageUpload(event)">
 
-    <div class="loader" id="globalLoader">
-        <i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu từ Cloud...
-    </div>
-    <div class="error-box" id="errorBox">
-        <i class="fa-solid fa-triangle-exclamation"></i> MÃ KHÔNG TỒN TẠI HOẶC CHƯA ĐƯỢC KÍCH HOẠT
+    <div class="loader" id="loadingText">
+        <i class="fa-solid fa-spinner fa-spin"></i> Đang quét cấu trúc ảnh...
     </div>
 
-    <div class="result-card" id="resultCard">
-        <div class="result-header">
-            <span style="font-weight: 700; font-size: 0.9rem; color: var(--primary);">THÔNG TIN THU NHẬP</span>
-            <div class="status-badge" id="statusBadge">
-                <span class="status-dot"></span> ĐANG CHẠY
-            </div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">Tài khoản check</div>
-            <div class="info-value" id="resUser" style="color: #fff;"></div>
-        </div>
-        <div class="info-row" id="countdownRow">
-            <div class="info-label">Thời gian còn lại</div>
-            <div class="info-value countdown" id="resCountdown">--h --m --s</div>
-        </div>
-        <div class="expired-box" id="expiredBox">
-            <div class="expired-text">⚠️ Thời gian nhận lợi nhuận đã hết! Vui lòng liên hệ hỗ trợ.</div>
-            <a href="https://t.me/bossyennhi_997" target="_blank" class="btn-telegram">
-                <i class="fa-brands fa-telegram"></i> Liên Hệ Telegram @bossyennhi_997
-            </a>
-        </div>
-        <div style="border-top: 1px dashed rgba(255,255,255,0.08); margin: 15px 0;"></div>
-        <div class="info-row" style="margin-bottom: 0;">
-            <div class="info-label">Lợi nhuận tích lũy thực tế</div>
-            <div class="info-value profit" id="resProfit">0₫</div>
-        </div>
+    <div class="status-success-box" id="successBox">
+        <i class="fa-solid fa-circle-check"></i> KHÔNG TRÙNG LẶP - ÁNH HỢP LỆ!
     </div>
 
-    <button class="btn-admin-toggle" id="adminToggleBtn" onclick="toggleAdminView()">Đăng nhập Admin</button>
-
-    <div class="admin-panel" id="adminPanel">
-        <div class="admin-title"><i class="fa-solid fa-lock-open"></i> BẢNG ĐIỀU KHIỂN ADMIN</div>
-        
-        <div id="adminLoginForm">
-            <div class="input-wrapper">
-                <input type="password" id="adminPassword" placeholder="Nhập mật khẩu Admin...">
-                <i class="fa-solid fa-lock"></i>
-            </div>
-            <button class="btn-check" onclick="verifyAdminLogin()">ĐĂNG NHẬP</button>
+    <div class="scan-result-container" id="resultContainer">
+        <div style="font-size: 0.85rem; margin-bottom: 10px; font-weight: 700; color: var(--neon-red)">
+            ⚠️ PHÁT HIỆN ẢNH TRÙNG LẶP DƯỚI ĐÂY:
         </div>
+        <div id="resultList"></div>
+    </div>
 
-        <div id="adminControl" style="display: none;">
-            <div class="info-label" style="margin-bottom: 8px;">1. Tên tài khoản mã VIP</div>
-            <div class="input-wrapper">
-                <input type="text" id="newCodeInput" placeholder="Ví dụ: VIP4 vananh_ctv">
-                <i class="fa-solid fa-plus"></i>
-            </div>
-            
-            <div class="info-label" style="margin-bottom: 8px;">2. Chọn thời hạn chạy</div>
-            <div class="input-wrapper">
-                <select id="timeDurationSelect" style="padding-left: 15px;">
-                    <option value="10m">10 Phút</option>
-                    <option value="30m">30 Phút</option>
-                    <option value="1h">1 Giờ</option>
-                    <option value="8h">8 Giờ</option>
-                    <option value="12h">12 Giờ</option>
-                    <option value="24h">24 Giờ</option>
-                </select>
-            </div>
-            
-            <button class="btn-check" onclick="createNewCode()">KÍCH HOẠT MÃ VIP NGAY</button>
-            
-            <div class="code-list" id="activeCodesContainer">
-                <div class="info-label" style="padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    Các mã VIP đang được kích hoạt
-                </div>
-                <div id="codeListContent"></div>
-            </div>
+    <div class="history-section">
+        <div class="history-header">
+            <div class="history-title">Tổng số ảnh đã lưu: <span id="historyCount" style="color:var(--primary)">0</span></div>
+            <button class="btn-clear" onclick="clearHistory()">Xóa lịch sử</button>
         </div>
+        <div class="history-list" id="historyContainer"></div>
     </div>
 </div>
 
 <script>
-    // ==========================================
-    // CẤU HÌNH API ĐỂ LƯU DỮ LIỆU ĐÁM MÂY (JSONBIN.IO)
-    // ==========================================
-    const JSONBIN_URL = 'https://api.jsonbin.io/v3/b/6a015a15adc21f119a811b58'; // <-- Thay Link Bin của bạn vào đây
-    const API_KEY = '$2a$10$kCf7K5S6pISKZTt1kYR75uiO7irzJ4vsGeHH4MHXTCq.dc2imb15C';   // <-- Thay Master Key của bạn vào đây
-    
-    const ADMIN_PASSWORD = "xuanmai2011";
+    let imageHistory = JSON.parse(localStorage.getItem('scanned_image_history')) || [];
 
-    const vipTariffs = {
-        "VIP1": { start: 70000, total: 147000 },
-        "VIP2": { start: 150000, total: 315000 },
-        "VIP3": { start: 190000, total: 399000 },
-        "VIP4": { start: 210000, total: 441000 },
-        "VIP5": { start: 300000, total: 630000 },
-        "VIP6": { start: 500000, total: 1250000 },
-        "VIP7": { start: 800000, total: 2000000 }
-    };
+    renderHistoryList();
 
-    let liveInterval = null;
-    let isAdminLoggedIn = false;
+    async function handleImageUpload(event) {
+        const files = event.target.files;
+        if (!files.length) return;
 
-    function parseDurationToMs(durationStr) {
-        const value = parseInt(durationStr);
-        if (durationStr.includes('m')) return value * 60 * 1000;
-        if (durationStr.includes('h')) return value * 60 * 60 * 1000;
-        return 0;
-    }
-
-    function formatVND(amount) {
-        return Math.floor(amount).toLocaleString('vi-VN') + "₫";
-    }
-
-    // TẢI DỮ LIỆU TỪ MÁY CHỦ CLOUD
-    async function fetchCloudCodes() {
-        showLoader(true);
-        try {
-            const res = await fetch(JSONBIN_URL, {
-                headers: { 'X-Master-Key': API_KEY }
-            });
-            const data = await res.json();
-            showLoader(false);
-            return data.record.codes || {};
-        } catch (e) {
-            console.error(e);
-            showLoader(false);
-            return {};
-        }
-    }
-
-    // LƯU DỮ LIỆU LÊN MÁY CHỦ CLOUD
-    async function saveCloudCodes(codesObj) {
-        showLoader(true);
-        try {
-            const res = await fetch(JSONBIN_URL, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': API_KEY
-                },
-                body: JSON.stringify({ codes: codesObj })
-            });
-            showLoader(false);
-            return res.ok;
-        } catch (e) {
-            console.error(e);
-            showLoader(false);
-            return false;
-        }
-    }
-
-    function showLoader(show) {
-        document.getElementById('globalLoader').style.display = show ? 'block' : 'none';
-    }
-
-    // HIỂN THỊ / ẨN PHẦN ĐĂNG NHẬP ADMIN
-    function toggleAdminView() {
-        const panel = document.getElementById('adminPanel');
-        const btn = document.getElementById('adminToggleBtn');
-        const appBox = document.getElementById('appBox');
-
-        if (panel.style.display === 'block') {
-            panel.style.display = 'none';
-            appBox.classList.remove('admin-mode');
-            btn.innerText = 'Đăng nhập Admin';
-        } else {
-            panel.style.display = 'block';
-            appBox.classList.add('admin-mode');
-            btn.innerText = 'Đóng Admin';
-        }
-    }
-
-    // KIỂM TRA MẬT KHẨU ĐĂNG NHẬP ADMIN
-    function verifyAdminLogin() {
-        const pwd = document.getElementById('adminPassword').value;
-        if (pwd === ADMIN_PASSWORD) {
-            isAdminLoggedIn = true;
-            document.getElementById('adminLoginForm').style.display = 'none';
-            document.getElementById('adminControl').style.display = 'block';
-            renderAdminCodesList();
-        } else {
-            alert('Mật khẩu Admin không đúng!');
-        }
-    }
-
-    // ADMIN: TẠO VÀ KÍCH HOẠT MÃ NGAY LẬP TỨC
-    async function createNewCode() {
-        const newCode = document.getElementById('newCodeInput').value.trim();
-        const duration = document.getElementById('timeDurationSelect').value;
-
-        if (!newCode) return alert('Vui lòng nhập tên mã VIP!');
-
-        const codes = await fetchCloudCodes();
+        document.getElementById('loadingText').style.display = 'block';
+        document.getElementById('successBox').style.display = 'none';
+        document.getElementById('resultContainer').style.display = 'none';
         
-        // Ghi lại mốc thời gian kích hoạt bằng đồng hồ thực tế của đám mây
-        codes[newCode] = {
-            duration: duration,
-            activatedAt: Date.now() 
-        };
+        const resultList = document.getElementById('resultList');
+        resultList.innerHTML = '';
 
-        const success = await saveCloudCodes(codes);
-        if (success) {
-            alert(`Đã kích hoạt thành công mã "${newCode}" với thời hạn ${duration}!`);
-            document.getElementById('newCodeInput').value = '';
-            renderAdminCodesList();
+        let hasDuplicate = false;
+        const nowStr = new Date().toLocaleString('vi-VN');
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const imgBase64 = await fileToDataURL(file);
+            const imgHash = await generateSimpleHash(imgBase64);
+            
+            const matchedItem = imageHistory.find(item => item.hash === imgHash);
+            
+            if (matchedItem) {
+                hasDuplicate = true;
+                
+                // Chỉ tạo và hiện chi tiết đối với những ảnh bị trùng
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'result-item';
+                itemDiv.innerHTML = `
+                    <img src="${imgBase64}" alt="duplicate">
+                    <div class="result-info">
+                        <div style="font-weight: 700; font-size: 0.9rem; color: #ff4d4d; margin-bottom:3px;">${file.name}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-sub)">ID ảnh: ${imgHash}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-sub)">Đã tải lên vào: ${matchedItem.time}</div>
+                    </div>
+                    <span class="result-status"><i class="fa-solid fa-triangle-exclamation"></i> BỊ TRÙNG</span>
+                `;
+                resultList.appendChild(itemDiv);
+            } else {
+                // Ảnh hợp lệ thì âm thầm lưu vào lịch sử, không hiện chi tiết
+                imageHistory.push({
+                    name: file.name,
+                    hash: imgHash,
+                    time: nowStr
+                });
+            }
+        }
+
+        localStorage.setItem('scanned_image_history', JSON.stringify(imageHistory));
+        renderHistoryList();
+        document.getElementById('loadingText').style.display = 'none';
+
+        // Xử lý hiển thị kết quả cuối cùng theo điều kiện
+        if (hasDuplicate) {
+            document.getElementById('resultContainer').style.display = 'block';
         } else {
-            alert('Gặp lỗi khi đồng bộ lên Cloud.');
+            document.getElementById('successBox').style.display = 'block';
         }
+        
+        document.getElementById('fileInput').value = '';
     }
 
-    // ADMIN: XÓA MÃ VIP KHỎI HỆ THỐNG
-    async function deleteCode(codeKey) {
-        if (!confirm(`Bạn có chắc muốn xóa mã VIP: ${codeKey}?`)) return;
-        const codes = await fetchCloudCodes();
-        delete codes[codeKey];
-        const success = await saveCloudCodes(codes);
-        if (success) {
-            renderAdminCodesList();
-        }
-    }
-
-    // ADMIN: IN DANH SÁCH MÃ HOẠT ĐỘNG RA BẢNG ĐIỀU KHIỂN
-    async function renderAdminCodesList() {
-        const codes = await fetchCloudCodes();
-        const container = document.getElementById('codeListContent');
-        container.innerHTML = '';
-
-        const keys = Object.keys(codes);
-        if (keys.length === 0) {
-            container.innerHTML = '<div style="font-size:0.8rem; color:var(--text-sub); text-align:center; padding:15px 0;">Không có mã nào đang hoạt động.</div>';
-            return;
-        }
-
-        keys.forEach(code => {
-            const item = document.createElement('div');
-            item.className = 'code-item';
-            item.innerHTML = `
-                <span><strong>${code}</strong> (${codes[code].duration})</span>
-                <button onclick="deleteCode('${code}')">Xóa mã</button>
-            `;
-            container.appendChild(item);
+    function fileToDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
         });
     }
 
-    // USER: CHECK MÃ VIP
-    async function processVerify() {
-        const inputVal = document.getElementById('userInput').value.trim();
-        const errorBox = document.getElementById('errorBox');
-        const resultCard = document.getElementById('resultCard');
-        const countdownRow = document.getElementById('countdownRow');
-        const expiredBox = document.getElementById('expiredBox');
-        const statusBadge = document.getElementById('statusBadge');
-
-        if (liveInterval) clearInterval(liveInterval);
-        errorBox.style.display = 'none';
-
-        // Tải danh sách mã từ đám mây về để so sánh
-        const activeCodes = await fetchCloudCodes();
-
-        // 1. Kiểm tra sự tồn tại của mã
-        if (!activeCodes[inputVal]) {
-            errorBox.style.display = 'block';
-            resultCard.style.display = 'none';
-            return;
-        }
-
-        const codeData = activeCodes[inputVal];
-        const vipType = inputVal.split(' ')[0].toUpperCase();
-        const config = vipTariffs[vipType];
-
-        // Nếu mã nhập vào không đúng cú pháp VIP (Ví dụ không bắt đầu bằng VIP1 -> VIP7)
-        if (!config) {
-            errorBox.style.display = 'block';
-            resultCard.style.display = 'none';
-            return;
-        }
-
-        resultCard.style.display = 'block';
-        countdownRow.style.display = 'block';
-        expiredBox.style.display = 'none';
-        
-        statusBadge.innerHTML = '<span class="status-dot"></span> ĐANG CHẠY';
-        statusBadge.style.color = 'var(--neon-green)';
-        statusBadge.style.background = 'rgba(57, 255, 20, 0.1)';
-        statusBadge.querySelector('.status-dot').style.background = 'var(--neon-green)';
-
-        document.getElementById('resUser').innerText = inputVal;
-
-        // Tính mốc thời gian hết hạn dựa trên lúc Admin bấm kích hoạt
-        const activatedAt = parseInt(codeData.activatedAt);
-        const totalDurationMs = parseDurationToMs(codeData.duration);
-        const expireTimestamp = activatedAt + totalDurationMs;
-
-        // 2. Chạy đếm ngược thời gian thực (Đồng bộ tuyệt đối từ lúc Admin kích hoạt)
-        liveInterval = setInterval(() => {
-            const now = Date.now();
-            const msRemaining = expireTimestamp - now;
-
-            // Nếu đã hết thời gian chạy
-            if (msRemaining <= 0) {
-                countdownRow.style.display = 'none';
-                expiredBox.style.display = 'block';
-                statusBadge.innerHTML = '<span class="status-dot" style="background: var(--neon-red); animation: none;"></span> HOÀN THÀNH';
-                statusBadge.style.color = 'var(--neon-red)';
-                statusBadge.style.background = 'rgba(255, 56, 56, 0.1)';
-                document.getElementById('resProfit').innerText = formatVND(config.total);
-                clearInterval(liveInterval);
-                return;
+    function generateSimpleHash(str) {
+        return new Promise((resolve) => {
+            let hash = 0;
+            if (str.length === 0) resolve(hash.toString(16));
+            const step = Math.max(1, Math.floor(str.length / 4000));
+            for (let i = 0; i < str.length; i += step) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash = hash & hash;
             }
+            resolve("ID-" + Math.abs(hash).toString(16).toUpperCase());
+        });
+    }
 
-            // Quy đổi sang H, M, S
-            const hours = Math.floor(msRemaining / (3600 * 1000));
-            const mins = Math.floor((msRemaining % (3600 * 1000)) / (60 * 1000));
-            const secs = Math.floor((msRemaining % (60 * 1000)) / 1000);
+    function renderHistoryList() {
+        const container = document.getElementById('historyContainer');
+        document.getElementById('historyCount').innerText = imageHistory.length;
+        container.innerHTML = '';
 
-            document.getElementById('resCountdown').innerText = `${hours}h ${mins}m ${secs}s`;
+        if (imageHistory.length === 0) {
+            container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-sub); text-align:center; padding:10px 0;">Lịch sử trống</div>';
+            return;
+        }
 
-            // Tính toán số tiền nhảy tự động từ lúc bắt đầu kích hoạt cho đến khi hết hạn
-            const msPassed = now - activatedAt;
-            const profitRange = config.total - config.start;
-            const moneyIncreases = config.start + (profitRange * (msPassed / totalDurationMs));
+        const reversedHistory = [...imageHistory].reverse();
+        reversedHistory.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'history-item';
+            row.innerHTML = `
+                <span style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 250px;">
+                    <i class="fa-regular fa-image" style="color:var(--secondary); margin-right:5px;"></i>${item.name}
+                </span>
+                <span style="color:var(--text-sub); font-size:0.75rem;">${item.hash}</span>
+            `;
+            container.appendChild(row);
+        });
+    }
 
-            document.getElementById('resProfit').innerText = formatVND(moneyIncreases);
-
-        }, 1000);
+    function clearHistory() {
+        if (!confirm('Xóa toàn bộ lịch sử ảnh cũ?')) return;
+        imageHistory = [];
+        localStorage.removeItem('scanned_image_history');
+        renderHistoryList();
+        document.getElementById('successBox').style.display = 'none';
+        document.getElementById('resultContainer').style.display = 'none';
     }
 </script>
 
