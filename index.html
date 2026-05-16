@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binance Predictor (Technical Analysis)</title>
+    <title>Binance Auto Predictor</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -25,37 +25,38 @@
         }
         h2 { text-align: center; color: #f3ba2f; margin-top: 0; }
         .row { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; color: #aeaeae; }
-        select, input {
+        label { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; color: #aeaeae; }
+        label span { color: #f3ba2f; font-weight: bold; }
+        select, input[type="range"] {
             width: 100%;
+            box-sizing: border-box;
+        }
+        select {
             padding: 10px;
             background: #2b3139;
             border: 1px solid #474d57;
             color: white;
             border-radius: 5px;
-            box-sizing: border-box;
         }
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #f3ba2f;
-            border: none;
-            color: #12161a;
-            font-weight: bold;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: 0.2s;
+        input[type="range"] {
+            margin-top: 5px;
+            accent-color: #f3ba2f;
         }
-        button:hover { background: #ecb21f; }
+        .status-bar {
+            text-align: center;
+            font-size: 12px;
+            color: #707a8a;
+            margin-bottom: 15px;
+        }
         .result-box {
-            margin-top: 20px;
+            margin-top: 15px;
             padding: 20px;
             border-radius: 5px;
             text-align: center;
             font-size: 24px;
             font-weight: bold;
             background: #2b3139;
+            transition: all 0.3s ease;
         }
         .UP { color: #0ecb81; border: 2px solid #0ecb81; background: rgba(14, 203, 129, 0.1); }
         .DOWN { color: #f6465d; border: 2px solid #f6465d; background: rgba(246, 70, 93, 0.1); }
@@ -67,17 +68,19 @@
             background: #181a20;
             padding: 10px;
             border-radius: 5px;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Binance Trend Predictor</h2>
+    <h2>Binance Auto Predictor</h2>
+    <div class="status-bar" id="statusBar">Đang khởi tạo hệ thống tự động...</div>
     
     <div class="row">
         <label>Cặp giao dịch:</label>
-        <select id="symbol">
+        <select id="symbol" onchange="triggerImmediateUpdate()">
             <option value="BTCUSDT">BTC/USDT</option>
             <option value="ETHUSDT">ETH/USDT</option>
             <option value="BNBUSDT">BNB/USDT</option>
@@ -86,64 +89,62 @@
     </div>
 
     <div class="row">
-        <label>Khung thời gian (Interval):</label>
-        <select id="interval">
-            <option value="1m">1 Phút</option>
-            <option value="5m" selected>5 Phút</option>
-            <option value="15m">15 Phút</option>
-            <option value="1h">1 Giờ</option>
-            <option value="4h">4 Giờ</option>
+        <label>Khung thời gian:</label>
+        <select id="interval" onchange="triggerImmediateUpdate()">
+            <option value="1m">1 Phút (Nhiều nhiễu)</option>
+            <option value="5m" selected>5 Phút (Cân bằng)</option>
+            <option value="15m">15 Phút (Chuẩn xác cao)</option>
+            <option value="1h">1 Giờ (Xu hướng lớn)</option>
         </select>
     </div>
 
     <hr style="border-color: #2b3139; margin: 20px 0;">
-    <h3 style="color: #f3ba2f; font-size: 16px;">Bộ điều chỉnh độ nhạy (Tối ưu thuật toán)</h3>
+    <h3 style="color: #f3ba2f; font-size: 15px; margin-bottom: 15px;">Thanh trượt tối ưu thuật toán (Tự động áp dụng)</h3>
     
     <div class="row">
-        <label>Ngưỡng RSI Quá mua (Mặc định 70 - Tăng để giảm báo giả DOWN):</label>
-        <input type="number" id="rsiOverbought" value="70" min="50" max="90">
+        <label>Ngưỡng Quá mua (Giảm báo giả DOWN): <span id="valOverbought">70</span></label>
+        <input type="range" id="rsiOverbought" min="60" max="85" value="70" oninput="updateSliders()">
     </div>
     <div class="row">
-        <label>Ngưỡng RSI Quá bán (Mặc định 30 - Giảm để giảm báo giả UP):</label>
-        <input type="number" id="rsiOversold" value="30" min="10" max="50">
+        <label>Ngưỡng Quá bán (Giảm báo giả UP): <span id="valOversold">30</span></label>
+        <input type="range" id="rsiOversold" min="15" max="40" value="30" oninput="updateSliders()">
     </div>
 
-    <button onclick="fetchDataAndPredict()">PHÂN TÍCH & DỰ ĐOÁN</button>
-
-    <div id="result" class="result-box NEUTRAL">CHƯA CÓ DỮ LIỆU</div>
+    <div id="result" class="result-box NEUTRAL">ĐANG QUÉT DỮ LIỆU...</div>
     
     <div class="details" id="details">
-        Hãy nhấn nút Dự đoán để quét dữ liệu từ hệ thống Binance...
+        Hệ thống đang đồng bộ với API Binance...
     </div>
 </div>
 
 <script>
-// Hàm tính RSI
+let autoInterval = null;
+let countdown = 5;
+
+function updateSliders() {
+    document.getElementById('valOverbought').innerText = document.getElementById('rsiOverbought').value;
+    document.getElementById('valOversold').innerText = document.getElementById('rsiOversold').value;
+    // Cập nhật lại dự đoán ngay lập tức khi người dùng kéo thanh trượt mà không đợi hết 5s
+    fetchDataAndPredict();
+}
+
 function calculateRSI(prices, period = 14) {
-    let gains = 0;
-    let losses = 0;
+    let gains = 0, losses = 0;
     for (let i = 1; i <= period; i++) {
         let diff = prices[i] - prices[i - 1];
-        if (diff > 0) gains += diff;
-        else losses -= diff;
+        if (diff > 0) gains += diff; else losses -= diff;
     }
-    let avgGain = gains / period;
-    let avgLoss = losses / period;
-    
+    let avgGain = gains / period, avgLoss = losses / period;
     for (let i = period + 1; i < prices.length; i++) {
         let diff = prices[i] - prices[i - 1];
         avgGain = (avgGain * (period - 1) + (diff > 0 ? diff : 0)) / period;
         avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
     }
-    if (avgLoss === 0) return 100;
-    let rs = avgGain / avgLoss;
-    return 100 - (100 / (1 + rs));
+    return avgLoss === 0 ? 100 : 100 - (100 / (1 + (avgGain / avgLoss)));
 }
 
-// Hàm tính EMA
 function calculateEMA(prices, period) {
-    let k = 2 / (period + 1);
-    let ema = prices[0];
+    let k = 2 / (period + 1), ema = prices[0];
     for (let i = 1; i < prices.length; i++) {
         ema = prices[i] * k + ema * (1 - k);
     }
@@ -158,70 +159,76 @@ async function fetchDataAndPredict() {
     
     const resultDiv = document.getElementById('result');
     const detailsDiv = document.getElementById('details');
-    
-    resultDiv.className = "result-box NEUTRAL";
-    resultDiv.innerText = "ĐANG TÍNH TOÁN...";
 
     try {
-        // Lấy 100 cây nến gần nhất từ API Binance
         const response = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=100`);
         const data = await response.json();
         
-        // Chuyển đổi dữ liệu giá đóng cửa (Close Price)
         const closePrices = data.map(candle => parseFloat(candle[4]));
         const currentPrice = closePrices[closePrices.length - 1];
 
-        // 1. Tính toán các chỉ báo
         const rsi = calculateRSI(closePrices, 14);
         const ema7 = calculateEMA(closePrices, 7);
         const ema25 = calculateEMA(closePrices, 25);
 
-        // 2. Thuật toán logic dự đoán (Đã tích hợp bộ lọc điều chỉnh)
-        let upScore = 0;
-        let downScore = 0;
+        let upScore = 0, downScore = 0;
 
-        // Logic EMA (Xu hướng xuôi dòng)
-        if (ema7 > ema25) upScore += 1;
-        else downScore += 1;
+        // Thuật toán chấm điểm xu hướng
+        if (ema7 > ema25) upScore += 1.5; else downScore += 1.5;
+        if (rsi < rsiOversold) upScore += 2;
+        if (rsi > rsiOverbought) downScore += 2;
+        if (currentPrice > ema7) upScore += 1; else downScore += 1;
 
-        // Logic RSI (Vùng đảo chiều)
-        if (rsi < rsiOversold) upScore += 2; // Quá bán -> Ưu tiên LÊN cực mạnh
-        if (rsi > rsiOverbought) downScore += 2; // Quá mua -> Ưu tiên XUỐNG cực mạnh
-
-        // Điểm đột phá giá hiện tại với EMA
-        if (currentPrice > ema7) upScore += 1;
-        else downScore += 1;
-
-        // 3. Kết luận kết quả
         let finalPrediction = "NEUTRAL";
         let textResult = "ĐI NGANG (SIDEWAYS)";
         
         if (upScore > downScore && rsi < rsiOverbought) {
             finalPrediction = "UP";
-            textResult = "XU HƯỚNG: LÊN (BUY)";
+            textResult = `MUA (UP) - Lực: ${upScore}`;
         } else if (downScore > upScore && rsi > rsiOversold) {
             finalPrediction = "DOWN";
-            textResult = "XU HƯỚNG: XUỐNG (SELL)";
+            textResult = `BÁN (DOWN) - Lực: ${downScore}`;
         }
 
-        // Hiển thị giao diện
         resultDiv.className = `result-box ${finalPrediction}`;
         resultDiv.innerText = textResult;
 
         detailsDiv.innerHTML = `
             <strong>Giá hiện tại:</strong> ${currentPrice} USDT<br>
-            <strong>Chỉ số RSI (14):</strong> ${rsi.toFixed(2)}<br>
-            <strong>Đường EMA(7):</strong> ${ema7.toFixed(2)} | <strong>EMA(25):</strong> ${ema25.toFixed(2)}<br>
-            <span style="color: #f3ba2f;">*Mẹo: Nếu thấy tỷ lệ sai ở nến ngắn, hãy tăng khung thời gian lên 15m hoặc 1h để triệt tiêu tín hiệu nhiễu.</span>
+            <strong>Chỉ số RSI (14):</strong> ${rsi.toFixed(2)} ${rsi > rsiOverbought ? '⚠️ (Quá mua)' : rsi < rsiOversold ? '⚠️ (Quá bán)' : ''}<br>
+            <strong>Đường EMA(7):</strong> ${ema7.toFixed(2)} | <strong>EMA(25):</strong> ${ema25.toFixed(2)}
         `;
-
     } catch (error) {
-        resultDiv.className = "result-box NEUTRAL";
-        resultDiv.innerText = "LỖI KẾT NỐI API";
-        detailsDiv.innerText = "Không thể lấy dữ liệu từ Binance. Vui lòng kiểm tra lại mạng.";
         console.error(error);
     }
 }
+
+function startAutoUpdate() {
+    if(autoInterval) clearInterval(autoInterval);
+    countdown = 5;
+    
+    autoInterval = setInterval(() => {
+        countdown--;
+        if(countdown <= 0) {
+            document.getElementById('statusBar').innerText = "Đang tự động cập nhật dữ liệu...";
+            fetchDataAndPredict();
+            countdown = 5; 
+        } else {
+            document.getElementById('statusBar').innerText = `Tự động cập nhật sau: ${countdown}s (Thời gian thực)`;
+        }
+    }, 1000);
+}
+
+function triggerImmediateUpdate() {
+    document.getElementById('result').className = "result-box NEUTRAL";
+    document.getElementById('result').innerText = "ĐANG CHUYỂN CẶP...";
+    fetchDataAndPredict();
+    startAutoUpdate();
+}
+
+// Khởi chạy ngay khi mở trang
+fetchDataAndPredict();
+startAutoUpdate();
 </script>
 
 </body>
