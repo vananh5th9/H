@@ -3,289 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binance Auto-Optimized Predictor</title>
+    <title>BNB Mini-Game Predictor</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #12161a;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #0c0e11;
             color: #eaeaea;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
         .container {
-            max-width: 600px;
+            max-width: 480px;
             width: 100%;
-            background: #1e2329;
+            background: #181a20;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        h2 { text-align: center; color: #f3ba2f; margin-top: 0; margin-bottom: 5px; }
-        .status-bar {
-            text-align: center;
-            font-size: 12px;
-            color: #707a8a;
-            margin-bottom: 15px;
-        }
-        .row { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; color: #aeaeae; }
-        select {
-            width: 100%;
-            padding: 10px;
-            background: #2b3139;
-            border: 1px solid #474d57;
-            color: white;
-            border-radius: 5px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
             box-sizing: border-box;
         }
-        .opt-box {
-            background: rgba(243, 186, 47, 0.1);
-            border: 1px dashed #f3ba2f;
-            padding: 12px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            font-size: 13px;
-        }
-        .result-box {
-            padding: 20px;
-            border-radius: 5px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
+        h2 { text-align: center; color: #f3ba2f; margin: 0 0 5px 0; font-size: 20px; }
+        .subtitle { text-align: center; color: #848e9c; font-size: 12px; margin-bottom: 20px; }
+        
+        .price-box {
             background: #2b3139;
-            transition: all 0.3s ease;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .price-label { font-size: 13px; color: #848e9c; }
+        .price-value { font-size: 32px; font-weight: bold; color: #f3ba2f; margin: 5px 0; }
+        
+        .result-title { font-size: 12px; color: #848e9c; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;}
+        .result-box {
+            padding: 22px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 800;
+            background: #21262c;
+            transition: all 0.2s ease;
         }
         .UP { color: #0ecb81; border: 2px solid #0ecb81; background: rgba(14, 203, 129, 0.1); }
         .DOWN { color: #f6465d; border: 2px solid #f6465d; background: rgba(246, 70, 93, 0.1); }
-        .NEUTRAL { color: #929aa5; border: 2px solid #929aa5; }
-        .details {
+        .NEUTRAL { color: #848e9c; border: 2px solid #474d57; }
+
+        .ai-status {
             margin-top: 15px;
-            font-size: 13px;
-            color: #aeaeae;
-            background: #181a20;
-            padding: 10px;
-            border-radius: 5px;
-            line-height: 1.6;
+            background: #1e2329;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.5;
         }
+        .ai-status span { font-weight: bold; }
+        .signal-strength { color: #f3ba2f; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Binance Smart Predictor</h2>
-    <div class="status-bar" id="statusBar">Đang quét dữ liệu nền...</div>
-    
-    <div class="row">
-        <label>Cặp giao dịch:</label>
-        <select id="symbol" onchange="triggerImmediateUpdate()">
-            <option value="BTCUSDT">BTC/USDT</option>
-            <option value="ETHUSDT">ETH/USDT</option>
-            <option value="BNBUSDT">BNB/USDT</option>
-            <option value="SOLUSDT">SOL/USDT</option>
-        </select>
+    <h2>BNB GAME PREDICTOR</h2>
+    <div class="subtitle">Hệ thống phân tích Động lượng Giây (Real-time Ticks)</div>
+
+    <div class="price-box">
+        <div class="price-label">GIÁ BNB TRÊN BINANCE (CẬP NHẬT LIÊN TỤC)</div>
+        <div class="price-value" id="bnbPrice">$0.00</div>
     </div>
 
-    <div class="row">
-        <label>Khung thời gian:</label>
-        <select id="interval" onchange="triggerImmediateUpdate()">
-            <option value="1m">1 Phút</option>
-            <option value="5m" selected>5 Phút</option>
-            <option value="15m">15 Phút</option>
-            <option value="1h">1 Giờ</option>
-        </select>
-    </div>
+    <div class="result-title">Dự đoán cho Round tiếp theo:</div>
+    <div id="predictResult" class="result-box NEUTRAL">ĐANG ĐỒNG BỘ...</div>
 
-    <!-- Hộp hiển thị kết quả AI tối ưu hóa tự động từ lịch sử -->
-    <div class="opt-box" id="optMetrics">
-        <strong>Trí tuệ nhân tạo (Backtest):</strong> Đang giả lập dữ liệu lịch sử để tìm cấu hình tối ưu...
-    </div>
-
-    <div id="result" class="result-box NEUTRAL">ĐANG TÍNH TOÁN...</div>
-    
-    <div class="details" id="details">
-        Hệ thống đang kết nối dữ liệu nến Binance...
+    <div class="ai-status">
+        <strong>Thuật toán tự động tối ưu ngầm:</strong><br>
+        • Xu hướng dòng tiền (30s): <span id="flowState" style="color: #aeaeae">Đang tính toán...</span><br>
+        • Lực mua/bán tức thời: <span id="signalStrength" class="signal-strength">0%</span><br>
+        • Trạng thái thị trường: <span id="marketType" style="color: #aeaeae">Đang quét sóng...</span>
     </div>
 </div>
 
 <script>
-let autoInterval = null;
-let countdown = 5;
+// Cấu hình kết nối WebSocket trực tiếp của Binance để lấy giá theo từng mili-giây
+const wsUrl = "wss://stream.binance.com:9443/ws/bnbusdt@ticker";
+let socket = new WebSocket(wsUrl);
 
-// Hàm tính toán mảng RSI cho toàn bộ dữ liệu lịch sử để phục vụ Backtest nhanh
-function calculateAllRSI(prices, period = 14) {
-    let rsiValues = new Array(prices.length).fill(0);
-    if (prices.length <= period) return rsiValues;
+let priceHistory = []; 
+const MAX_HISTORY = 45; // Lưu lịch sử biến động trong 45 giây gần nhất
 
-    let gains = 0, losses = 0;
-    for (let i = 1; i <= period; i++) {
-        let diff = prices[i] - prices[i - 1];
-        if (diff > 0) gains += diff; else losses -= diff;
-    }
-    let avgGain = gains / period;
-    let avgLoss = losses / period;
-    rsiValues[period] = avgLoss === 0 ? 100 : 100 - (100 / (1 + (avgGain / avgLoss)));
-
-    for (let i = period + 1; i < prices.length; i++) {
-        let diff = prices[i] - prices[i - 1];
-        avgGain = (avgGain * (period - 1) + (diff > 0 ? diff : 0)) / period;
-        avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
-        rsiValues[i] = avgLoss === 0 ? 100 : 100 - (100 / (1 + (avgGain / avgLoss)));
-    }
-    return rsiValues;
-}
-
-// Hàm tính mảng EMA
-function calculateAllEMA(prices, period) {
-    let emaValues = new Array(prices.length).fill(0);
-    if (prices.length === 0) return rsiValues;
-    let k = 2 / (period + 1);
-    let ema = prices[0];
-    emaValues[0] = ema;
-    for (let i = 1; i < prices.length; i++) {
-        ema = prices[i] * k + ema * (1 - k);
-        emaValues[i] = ema;
-    }
-    return emaValues;
-}
-
-async function fetchDataAndPredict() {
-    const symbol = document.getElementById('symbol').value;
-    const interval = document.getElementById('interval').value;
+socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    const currentPrice = parseFloat(data.c); // Giá khớp lệnh gần nhất
     
-    const resultDiv = document.getElementById('result');
-    const detailsDiv = document.getElementById('details');
-    const optMetricsDiv = document.getElementById('optMetrics');
+    // Hiển thị giá lên màn hình giống trong game
+    document.getElementById('bnbPrice').innerText = `$${currentPrice.toFixed(2)}`;
 
-    try {
-        // Tải 500 cây nến để chạy thuật toán tối ưu hóa lịch sử
-        const response = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=500`);
-        const data = await response.json();
-        
-        const closePrices = data.map(candle => parseFloat(candle[4]));
-        const currentPrice = closePrices[closePrices.length - 1];
+    // Lưu giá vào bộ nhớ lịch sử
+    const now = Date.now();
+    priceHistory.push({ price: currentPrice, time: now });
 
-        // Tính toán các chỉ báo cho toàn bộ chuỗi lịch sử
-        const rsiArray = calculateAllRSI(closePrices, 14);
-        const ema7Array = calculateAllEMA(closePrices, 7);
-        const ema25Array = calculateAllEMA(closePrices, 25);
-
-        // --- ENGINE TỰ ĐỘNG TỐI ƯU HÓA (BACKTESTING) ---
-        // Thử nghiệm các bộ tham số cấu hình RSI khác nhau để tìm ra bộ lọc ít lỗi nhất
-        let bestOverbought = 70;
-        let bestOversold = 30;
-        let maxWinRate = -1;
-        let bestTotalSignals = 0;
-
-        const testRanges = [
-            {ob: 65, os: 35}, {ob: 70, os: 30}, {ob: 75, os: 25}, {ob: 80, os: 20}
-        ];
-
-        testRanges.forEach(config => {
-            let correctSignals = 0;
-            let totalSignals = 0;
-
-            // Quét lịch sử từ cây nến thứ 50 đến cây nến kế cuối (-2) để kiểm chứng độ chuẩn xác
-            for (let i = 50; i < closePrices.length - 1; i++) {
-                let upScore = 0, downScore = 0;
-
-                if (ema7Array[i] > ema25Array[i]) upScore += 1.5; else downScore += 1.5;
-                if (rsiArray[i] < config.os) upScore += 2;
-                if (rsiArray[i] > config.ob) downScore += 2;
-                if (closePrices[i] > ema7Array[i]) upScore += 1; else downScore += 1;
-
-                let pred = "NEUTRAL";
-                if (upScore > downScore && rsiArray[i] < config.ob) pred = "UP";
-                else if (downScore > upScore && rsiArray[i] > config.os) pred = "DOWN";
-
-                if (pred !== "NEUTRAL") {
-                    totalSignals++;
-                    // So sánh với kết quả thực tế của cây nến tiếp theo (i + 1)
-                    let actualMove = closePrices[i+1] > closePrices[i] ? "UP" : "DOWN";
-                    if (pred === actualMove) {
-                        correctSignals++;
-                    }
-                }
-            }
-
-            let winRate = totalSignals > 0 ? (correctSignals / totalSignals) * 100 : 0;
-            if (winRate > maxWinRate && totalSignals > 5) {
-                maxWinRate = winRate;
-                bestOverbought = config.ob;
-                bestOversold = config.os;
-                bestTotalSignals = totalSignals;
-            }
-        });
-
-        // Hiển thị cấu hình tối ưu vừa tìm được từ lịch sử
-        optMetricsDiv.innerHTML = `
-            <strong>Cấu hình tối ưu tự động:</strong> Quá mua: <span style="color:#f6465d">${bestOverbought}</span> | Quá bán: <span style="color:#0ecb81">${bestOversold}</span><br>
-            <strong>Độ chuẩn xác lịch sử (Win Rate):</strong> <span style="color:#f3ba2f; font-weight:bold;">${maxWinRate.toFixed(1)}%</span> (Dựa trên ${bestTotalSignals} tín hiệu điểm vào)
-        `;
-
-        // --- ĐƯA RA DỰ ĐOÁN CHO CÂY NẾN HIỆN TẠI VỚI BỘ LỌC TỐI ƯU TRÊN ---
-        const lastRSI = rsiArray[rsiArray.length - 1];
-        const lastEMA7 = ema7Array[ema7Array.length - 1];
-        const lastEMA25 = ema25Array[ema25Array.length - 1];
-
-        let upScore = 0, downScore = 0;
-        if (lastEMA7 > lastEMA25) upScore += 1.5; else downScore += 1.5;
-        if (lastRSI < bestOversold) upScore += 2;
-        if (lastRSI > bestOverbought) downScore += 2;
-        if (currentPrice > lastEMA7) upScore += 1; else downScore += 1;
-
-        let finalPrediction = "NEUTRAL";
-        let textResult = "ĐI NGANG (SIDEWAYS)";
-        
-        if (upScore > downScore && lastRSI < bestOverbought) {
-            finalPrediction = "UP";
-            textResult = "MUA (UP)";
-        } else if (downScore > upScore && lastRSI > bestOversold) {
-            finalPrediction = "DOWN";
-            textResult = "BÁN (DOWN)";
-        }
-
-        resultDiv.className = `result-box ${finalPrediction}`;
-        resultDiv.innerText = textResult;
-
-        detailsDiv.innerHTML = `
-            <strong>Giá hiện tại:</strong> ${currentPrice} USDT<br>
-            <strong>Chỉ số RSI:</strong> ${lastRSI.toFixed(2)}<br>
-            <strong>Đường EMA(7):</strong> ${lastEMA7.toFixed(2)} | <strong>EMA(25):</strong> ${lastEMA25.toFixed(2)}
-        `;
-    } catch (error) {
-        console.error("Lỗi thuật toán tối ưu:", error);
+    // Xóa bớt dữ liệu cũ quá 45 giây để giải phóng bộ nhớ
+    if (priceHistory.length > MAX_HISTORY) {
+        priceHistory.shift();
     }
-}
 
-function startAutoUpdate() {
-    if(autoInterval) clearInterval(autoInterval);
-    countdown = 5;
+    // Tiến hành phân tích khi có đủ dữ liệu (sau khoảng 5-10 giây đầu tiên)
+    if (priceHistory.length > 5) {
+        analyzeAndPredict(currentPrice);
+    }
+};
+
+function analyzeAndPredict(currentPrice) {
+    const totalTicks = priceHistory.length;
     
-    autoInterval = setInterval(() => {
-        countdown--;
-        if(countdown <= 0) {
-            document.getElementById('statusBar').innerText = "Đang tối ưu & quét lại dữ liệu...";
-            fetchDataAndPredict();
-            countdown = 5; 
+    // 1. Tính toán Động lượng ngắn hạn (Giá hiện tại so với 5 ticks trước)
+    const shortTermIdx = Math.max(0, totalTicks - 6);
+    const shortTermPrice = priceHistory[shortTermIdx].price;
+    const shortDiff = currentPrice - shortTermPrice;
+
+    // 2. Tính toán Động lượng dài hơn (Giá hiện tại so với 30 ticks trước)
+    const longTermIdx = Math.max(0, totalTicks - 31);
+    const longTermPrice = priceHistory[longTermIdx].price;
+    const longDiff = currentPrice - longTermPrice;
+
+    // 3. Đếm số lượng Tick tăng / Tick giảm trong lịch sử lưu trữ
+    let upTicks = 0;
+    let downTicks = 0;
+    for(let i = 1; i < priceHistory.length; i++) {
+        if(priceHistory[i].price > priceHistory[i-1].price) upTicks++;
+        else if(priceHistory[i].price < priceHistory[i-1].price) downTicks++;
+    }
+
+    // --- THUẬT TOÁN RA QUYẾT ĐỊNH (TỰ ĐỘNG ĐIỀU CHỈNH THEO SÓNG NGẮN) ---
+    let upScore = 0;
+    let downScore = 0;
+
+    // Điểm cộng theo xu hướng dòng tiền chảy
+    if (shortDiff > 0) upScore += 2;
+    if (shortDiff < 0) downScore += 2;
+    if (longDiff > 0) upScore += 1;
+    if (longDiff < 0) downScore += 1;
+
+    // Điểm cộng theo số lượng nến giật trong giây
+    if (upTicks > downTicks) upScore += 1.5;
+    if (downTicks > upTicks) downScore += 1.5;
+
+    // Tính toán phần trăm độ mạnh của tín hiệu
+    const totalScore = upScore + downScore;
+    const strength = totalScore > 0 ? Math.round((Math.max(upScore, downScore) / totalScore) * 100) : 0;
+
+    // --- HIỂN THỊ KẾT QUẢ ĐÃ LỌC SAI SÓT ---
+    const resultDiv = document.getElementById('predictResult');
+    
+    // Ngưỡng lọc nhiễu: Tín hiệu phải có độ mạnh > 55% thì mới báo lệnh, tránh thị trường đi ngang giật giá đóng/chốt bằng nhau
+    if (strength > 55) {
+        if (upScore > downScore) {
+            resultDiv.className = "result-box UP";
+            resultDiv.innerText = "LÊN (UP)";
         } else {
-            document.getElementById('statusBar').innerText = `Tự động tối ưu lại sau: ${countdown}s`;
+            resultDiv.className = "result-box DOWN";
+            resultDiv.innerText = "XUỐNG (DOWN)";
         }
-    }, 1000);
+    } else {
+        resultDiv.className = "result-box NEUTRAL";
+        resultDiv.innerText = "CHỜ TÍN HIỆU (BỎ QUA)";
+    }
+
+    // Cập nhật bảng trạng thái thuật toán tự động
+    document.getElementById('flowState').innerHTML = longDiff > 0 ? '<span style="color:#0ecb81">TĂNG TRƯỞNG ▲</span>' : '<span style="color:#f6465d">SUY GIẢM ▼</span>';
+    document.getElementById('signalStrength').innerText = `${strength}%`;
+    document.getElementById('marketType').innerText = Math.abs(longDiff) < 0.15 ? "Đi ngang (Dễ hòa - Nên cẩn trọng)" : "Có Sóng rõ ràng (Tỷ lệ chuẩn cao)";
 }
 
-function triggerImmediateUpdate() {
-    document.getElementById('result').className = "result-box NEUTRAL";
-    document.getElementById('result').innerText = "ĐANG TÍNH TOÁN...";
-    fetchDataAndPredict();
-    startAutoUpdate();
-}
-
-// Chạy khởi tạo
-fetchDataAndPredict();
-startAutoUpdate();
+// Tự động kết nối lại nếu mất mạng
+socket.onclose = function() {
+    setTimeout(() => { location.reload(); }, 3000);
+};
 </script>
 
 </body>
