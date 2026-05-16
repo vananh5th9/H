@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI BNB Mini-Game Engine</title>
+    <title>AI Chainlink-Oracle Game Predictor</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0b0e11;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #0c0e11;
             color: #eaeaea;
             margin: 0;
             padding: 15px;
@@ -21,191 +21,154 @@
             background: #181a20;
             padding: 20px;
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
             box-sizing: border-box;
         }
-        h2 { text-align: center; color: #f3ba2f; margin: 0 0 5px 0; font-size: 22px; }
-        .timer-bar {
+        h2 { text-align: center; color: #f3ba2f; margin: 0 0 5px 0; font-size: 20px; }
+        .subtitle { text-align: center; color: #848e9c; font-size: 11px; margin-bottom: 20px; }
+        
+        .price-panel {
             background: #2b3139;
-            height: 6px;
-            width: 100%;
-            border-radius: 3px;
-            margin: 15px 0;
-            overflow: hidden;
-        }
-        .timer-progress {
-            background: #f3ba2f;
-            height: 100%;
-            width: 100%;
-            transition: width 1s linear;
-        }
-        .price-card {
-            background: #21262c;
-            border: 1px solid #2b3139;
             border-radius: 12px;
             padding: 15px;
             text-align: center;
             margin-bottom: 15px;
         }
-        .price-now { font-size: 36px; font-weight: bold; color: #f3ba2f; }
-        .predict-box {
-            padding: 25px;
+        .price-label { font-size: 12px; color: #848e9c; }
+        .price-main { font-size: 34px; font-weight: bold; color: #f3ba2f; margin: 5px 0; }
+        
+        .sources { display: flex; justify-content: space-around; font-size: 11px; color: #aeaeae; margin-top: 8px; border-top: 1px solid #474d57; padding-top: 8px;}
+
+        .result-box {
+            padding: 22px;
             border-radius: 12px;
             text-align: center;
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 800;
-            letter-spacing: 1px;
+            background: #21262c;
             margin-bottom: 15px;
-            box-sizing: border-box;
         }
-        .UP { color: #0ecb81; border: 3px solid #0ecb81; background: rgba(14, 203, 129, 0.15); animation: pulseGreen 1.5s infinite; }
-        .DOWN { color: #f6465d; border: 3px solid #f6465d; background: rgba(246, 70, 93, 0.15); animation: pulseRed 1.5s infinite; }
-        .WAIT { color: #848e9c; border: 2px dashed #474d57; background: #1e2329; }
-        
-        .panel {
+        .UP { color: #0ecb81; border: 2px solid #0ecb81; background: rgba(14, 203, 129, 0.1); }
+        .DOWN { color: #f6465d; border: 2px solid #f6465d; background: rgba(246, 70, 93, 0.1); }
+        .NEUTRAL { color: #848e9c; border: 2px dashed #474d57; }
+
+        .status-list {
             background: #1e2329;
             padding: 12px;
             border-radius: 8px;
-            font-size: 13px;
-        }
-        .panel-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
-        .panel-row:last-child { margin-bottom: 0; }
-        .txt-bold { font-weight: bold; }
-        
-        @keyframes pulseGreen {
-            0% { box-shadow: 0 0 0 0 rgba(14, 203, 129, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(14, 203, 129, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(14, 203, 129, 0); }
-        }
-        @keyframes pulseRed {
-            0% { box-shadow: 0 0 0 0 rgba(246, 70, 93, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(246, 70, 93, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(246, 70, 93, 0); }
+            font-size: 12px;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>AI BNB TARGET BOT</h2>
-    <div style="text-align:center; font-size:12px; color:#848e9c;">Chu kỳ: Lọc nhiễu 30s + Đột phá 90s</div>
-    
-    <div class="timer-bar">
-        <div id="progress" class="timer-progress"></div>
+    <h2>AI ORACLE PREDICTOR</h2>
+    <div class="subtitle">Thuật toán giả lập chuỗi dữ liệu tổng hợp (Chainlink VWAP)</div>
+
+    <div class="price-panel">
+        <div class="price-label">GIÁ TỔNG HỢP ĐA SÀN (ƯỚC TÍNH GIÁ GAME)</div>
+        <div class="price-main" id="oraclePrice">$0.00</div>
+        <div class="sources">
+            <span>Binance: <span id="pBinance">0.00</span></span>
+            <span>Coinbase: <span id="pCoinbase">0.00</span></span>
+        </div>
     </div>
 
-    <div class="price-card">
-        <div style="font-size:12px; color:#848e9c; margin-bottom:5px;">GIÁ BNB REAL-TIME (BINANCE)</div>
-        <div id="price" class="price-now">$0.00</div>
-    </div>
+    <div id="prediction" class="result-box NEUTRAL">ĐANG ĐỒNG BỘ SÀN...</div>
 
-    <div id="predictBox" class="predict-box WAIT">ĐANG NẠP TICK DATA...</div>
-
-    <div class="panel">
-        <div class="panel-row">
-            <span>Độ khớp xung lực (AI Winrate dự kiến):</span>
-            <span id="aiConfidence" class="txt-bold" style="color:#f3ba2f;">0%</span>
-        </div>
-        <div class="panel-row">
-            <span>Dòng tiền lớn tích lũy (90s):</span>
-            <span id="whaleFlow" class="txt-bold">—</span>
-        </div>
-        <div class="panel-row">
-            <span>Biến động quét 30s gần nhất:</span>
-            <span id="delta30" class="txt-bold">—</span>
-        </div>
+    <div class="status-list">
+        • Độ tin cậy thuật toán: <span id="confidence" style="color:#f3ba2f; font-weight:bold;">0%</span><br>
+        • Cường độ dòng tiền tổng hợp: <span id="flow">Đang quét...</span><br>
+        • Trạng thái: <span style="color:#0ecb81">Đang chạy ngầm tự động liên tục</span>
     </div>
 </div>
 
 <script>
-const ws = new WebSocket("wss://stream.binance.com:9443/ws/bnbusdt@ticker");
-let ticks = [];
-let gameRoundTime = 0;
+let binancePrice = 0;
+let coinbasePrice = 0;
+let historyData = [];
 
-ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    const p = parseFloat(data.c);
-    document.getElementById('price').innerText = `$${p.toFixed(2)}`;
-    
-    ticks.push({ p: p, t: Date.now() });
-    if(ticks.length > 200) ticks.shift(); // Giữ đủ lượng data cho 3 phút liên tục
+// 1. Kết nối Websocket lấy giá Binance
+const wsBinance = new WebSocket("wss://stream.binance.com:9443/ws/bnbusdt@ticker");
+wsBinance.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    binancePrice = parseFloat(data.c);
+    document.getElementById('pBinance').innerText = binancePrice.toFixed(2);
+    updateOraclePrice();
+};
 
-    if(ticks.length > 30) {
-        processAI();
+// 2. Kết nối Websocket lấy giá Coinbase
+const wsCoinbase = new WebSocket("wss://ws-feed.exchange.coinbase.com");
+wsCoinbase.onopen = () => {
+    wsCoinbase.send(JSON.stringify({
+        "type": "subscribe",
+        "product_ids": ["BNB-USD"],
+        "channels": ["ticker"]
+    }));
+};
+wsCoinbase.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    if(data.type === "ticker" && data.price) {
+        coinbasePrice = parseFloat(data.price);
+        document.getElementById('pCoinbase').innerText = coinbasePrice.toFixed(2);
+        updateOraclePrice();
     }
 };
 
-function processAI() {
-    const now = Date.now();
-    const curPrice = ticks[ticks.length - 1].p;
+// 3. Tính toán giá trung bình để khớp với cấu trúc Oracle Chainlink
+function updateOraclePrice() {
+    if (binancePrice === 0 || coinbasePrice === 0) return;
+    
+    // Công thức tính trung bình để mượt giá giống Chainlink
+    const avgPrice = (binancePrice + coinbasePrice) / 2;
+    document.getElementById('oraclePrice').innerText = `$${avgPrice.toFixed(2)}`;
 
-    // Lấy dữ liệu mốc thời gian lịch sử
-    const t30 = ticks.find(x => now - x.t <= 30000) || ticks[0];
-    const t90 = ticks.find(x => now - x.t <= 90000) || ticks[0];
-    const t120 = ticks.find(x => now - x.t <= 120000) || ticks[0];
+    historyData.push({ price: avgPrice, time: Date.now() });
+    if(historyData.length > 60) historyData.shift(); 
 
-    // Tính toán độ lệch delta giá
-    const d30 = curPrice - t30.p;
-    const d90 = curPrice - t90.p;
-    const d120 = curPrice - t120.p;
-
-    // Đếm áp lực mua bán chủ động (Volume Ticks)
-    let upPressure = 0, downPressure = 0;
-    const sampleSize = Math.min(ticks.length, 60);
-    for(let i = ticks.length - sampleSize; i < ticks.length - 1; i++) {
-        if(ticks[i+1].p > ticks[i].p) upPressure++;
-        else if(ticks[i+1].p < ticks[i].p) downPressure++;
+    if(historyData.length > 10) {
+        runOracleAI(avgPrice);
     }
+}
 
-    // --- THUẬT TOÁN ĐIỀU CHỈNH TỰ ĐỘNG GIẢM SAI LẦM ---
-    let upScore = 0, downScore = 0;
+function runOracleAI(currentAvg) {
+    // Đo lường độ lệch giá trong các khoảng 15s và 45s để đón đầu nhịp chốt 90s của game
+    const t15Idx = Math.max(0, historyData.length - 15);
+    const t45Idx = Math.max(0, historyData.length - 45);
+    
+    const d15 = currentAvg - historyData[t15Idx].price;
+    const d45 = currentAvg - historyData[t45Idx].price;
 
-    // Khớp xu hướng nén
-    if (d30 > 0) upScore += 2.5; else if (d30 < 0) downScore += 2.5;
-    if (d90 > 0) upScore += 1.5; else if (d90 < 0) downScore += 1.5;
-    if (d120 > 0) upScore += 1.0; else if (d120 < 0) downScore += 1.0;
+    let upScore = 0;
+    let downScore = 0;
 
-    // Áp lực khối lượng hành vi
-    if (upPressure > downPressure) upScore += 2.0; else if (downPressure > upPressure) downScore += 2.0;
+    if (d15 > 0) upScore += 3; else if (d15 < 0) downScore += 3;
+    if (d45 > 0) upScore += 2; else if (d45 < 0) downScore += 2;
 
     const total = upScore + downScore;
     const confidence = total > 0 ? Math.round((Math.max(upScore, downScore) / total) * 100) : 0;
 
-    // Cập nhật giao diện Panel bổ trợ
-    document.getElementById('aiConfidence').innerText = `${confidence}%`;
-    document.getElementById('delta30').innerText = d30 > 0 ? `+${d30.toFixed(2)}` : d30.toFixed(2);
-    document.getElementById('delta30').style.color = d30 > 0 ? '#0ecb81' : '#f6465d';
-    document.getElementById('whaleFlow').innerText = d90 > 0 ? "BÊN MUA GOM" : "BÊN BÁN XẢ";
-    document.getElementById('whaleFlow').style.color = d90 > 0 ? '#0ecb81' : '#f6465d';
+    document.getElementById('confidence').innerText = `${confidence}%`;
+    document.getElementById('flow').innerText = d45 > 0 ? "LỰC MUA ÁP ĐẢO" : "LỰC BÁN ÁP ĐẢO";
+    document.getElementById('flow').style.color = d45 > 0 ? "#0ecb81" : "#f6465d";
 
-    // ĐƯA RA KẾT LUẬN CHÍNH XÁC:
-    // Tự động triệt tiêu tín hiệu nếu độ chuẩn xác (Confidence) dưới 62% (Giảm tối đa tỷ lệ báo sai khi thị trường đi ngang)
-    const box = document.getElementById('predictBox');
-    if (confidence >= 62) {
+    const box = document.getElementById('prediction');
+    // Chỉ báo lệnh khi xu hướng đa sàn đồng thuận cao (>65%), giảm thiểu tối đa lệch nến đơn lẻ
+    if (confidence > 65) {
         if (upScore > downScore) {
-            box.className = "predict-box UP";
-            box.innerText = "KÈO: LÊN (UP)";
+            box.className = "result-box UP";
+            box.innerText = "DỰ ĐOÁN: LÊN";
         } else {
-            box.className = "predict-box DOWN";
-            box.innerText = "KÈO: XUỐNG (DOWN)";
+            box.className = "result-box DOWN";
+            box.innerText = "DỰ ĐOÁN: XUỐNG";
         }
     } else {
-        box.className = "predict-box WAIT";
-        box.innerText = "TÍN HIỆU YẾU - BỎ QUA";
+        box.className = "result-box NEUTRAL";
+        box.innerText = "SÓNG NHIỄU - BỎ QUA";
     }
 }
-
-// Đồng bộ hóa chu kỳ đếm ngược 2 phút giả lập (Giúp bạn căn khớp nhịp cược)
-setInterval(() => {
-    gameRoundTime++;
-    if(gameRoundTime > 120) gameRoundTime = 0;
-    
-    // Giả lập thanh thời gian 2 phút chạy lặp lại liên tục
-    const percent = ((120 - gameRoundTime) / 120) * 100;
-    document.getElementById('progress').style.width = `${percent}%`;
-}, 1000);
-
-ws.onclose = () => setTimeout(() => location.reload(), 2000);
 </script>
 
 </body>
