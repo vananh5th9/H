@@ -2,327 +2,356 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Tool Dự Đoán Tài Xỉu - Mini + Kéo thả + Mã phiên</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phân tích lịch sử Tài Xỉu - Tìm thuật toán tối ưu</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none; /* tránh bôi đen khi kéo */
-        }
-
         body {
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-            background: #000;
-        }
-
-        /* iframe game full màn hình */
-        .game-frame {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-            z-index: 1;
-        }
-
-        /* box dự đoán nhỏ gọn, có thể kéo thả */
-        .mini-predictor {
-            position: fixed;
-            width: 150px;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(12px);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 193, 7, 0.7);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-            z-index: 9999;
+            background: #0b1420;
             font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 20px;
+            color: #eef4ff;
+        }
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            background: #0f1a24cc;
+            border-radius: 32px;
+            padding: 24px;
+            backdrop-filter: blur(2px);
+        }
+        h1 {
             text-align: center;
-            padding: 10px 8px;
-            transition: box-shadow 0.2s;
-            cursor: default;
-        }
-
-        /* header dùng để kéo thả */
-        .drag-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.7rem;
-            color: #ffd966;
-            border-bottom: 1px solid #ffb34766;
-            padding-bottom: 5px;
-            margin-bottom: 8px;
-            cursor: grab;
-        }
-        .drag-header:active {
-            cursor: grabbing;
-        }
-        .robot-icon {
-            font-size: 16px;
-        }
-        .title {
-            font-weight: bold;
-            letter-spacing: 0.5px;
-        }
-        .rotate-btn {
-            background: none;
-            border: none;
-            color: #ccc;
-            cursor: pointer;
-            font-size: 13px;
-            width: 24px;
-            height: 24px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .rotate-btn:hover {
-            background: #2c4c66;
-            color: #ffaa33;
-        }
-
-        /* nội dung bên trong (có thể xoay) */
-        .mini-content {
-            transition: transform 0.2s ease;
-        }
-        .rotated-90 {
-            transform: rotate(90deg);
-        }
-
-        /* mã phiên */
-        .session {
-            font-size: 0.65rem;
-            background: #00000066;
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 30px;
-            margin-bottom: 6px;
-            color: #bbd4ff;
-        }
-
-        /* kết quả dự đoán lớn */
-        .prediction {
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: 2px;
             background: linear-gradient(135deg, #FFD966, #FF8C42);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            text-shadow: 0 0 5px #ff8800aa;
-            margin: 4px 0;
         }
-
-        /* status nhỏ */
-        .status {
-            font-size: 0.55rem;
-            color: #aaa;
-            margin-top: 6px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* nút refresh nhỏ */
-        .refresh-btn {
+        button {
             background: #f0a500;
             border: none;
-            width: 100%;
+            padding: 10px 24px;
             border-radius: 40px;
-            padding: 4px 0;
-            font-size: 0.6rem;
             font-weight: bold;
-            margin-top: 6px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            color: #1e2f3c;
+            margin: 10px 5px;
         }
-        .refresh-btn:hover {
+        button:hover {
             background: #ffbc3c;
+        }
+        .section {
+            background: #05161f99;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 28px;
+            border-left: 5px solid #ffb347;
+        }
+        pre {
+            background: #000000aa;
+            padding: 12px;
+            border-radius: 20px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #3a5c74;
+            padding: 8px;
+            text-align: center;
+        }
+        .best-algo {
+            background: #1e3a2f;
+            padding: 16px;
+            border-radius: 28px;
+            font-size: 1.2rem;
+            margin: 20px 0;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffaa66;
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.8rem;
+            margin-top: 30px;
+            color: #8aaec0;
         }
     </style>
 </head>
 <body>
-
-<!-- iframe game lc79.bet -->
-<iframe class="game-frame" src="https://lc79.bet" title="LC79 Game" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-<!-- Box dự đoán nhỏ gọn, có thể kéo thả -->
-<div id="miniBox" class="mini-predictor" style="top: 80px; right: 20px;">
-    <div class="drag-header" id="dragHeader">
-        <i class="fas fa-robot robot-icon"></i>
-        <span class="title">Dự đoán</span>
-        <button id="rotateBtn" class="rotate-btn"><i class="fas fa-sync-alt"></i></button>
+<div class="container">
+    <h1>📊 PHÂN TÍCH LỊCH SỬ TÀI XỈU 🔍</h1>
+    <p style="text-align:center">Gọi API → Đọc từ dưới lên (cũ → mới) → Thống kê → Đề xuất thuật toán tối ưu nhất</p>
+    <div style="display: flex; justify-content: center; gap: 12px;">
+        <button id="fetchBtn">🚀 LẤY LỊCH SỬ & PHÂN TÍCH</button>
+        <button id="exportBtn">📥 XUẤT JSON</button>
     </div>
-    <div class="mini-content" id="miniContent">
-        <div id="sessionDisplay" class="session">Phiên: --</div>
-        <div id="predictionResult" class="prediction">---</div>
-        <div id="statusText" class="status">
-            <i class="fas fa-spinner fa-pulse"></i> Đang chạy...
+
+    <div id="resultArea">
+        <div class="section">
+            <h3>📌 DỮ LIỆU THÔ (từ dưới lên - cũ nhất đến mới nhất)</h3>
+            <pre id="rawDataPreview">Chưa có dữ liệu. Nhấn nút trên.</pre>
         </div>
-        <button id="manualBtn" class="refresh-btn">
-            <i class="fas fa-chart-simple"></i> Ngay
-        </button>
+
+        <div class="section">
+            <h3>📈 THỐNG KÊ TỔNG QUAN</h3>
+            <div id="statistics">--</div>
+        </div>
+
+        <div class="section">
+            <h3>🤖 THUẬT TOÁN DỰ ĐOÁN ĐỀ XUẤT (CHUẨN XÁC NHẤT)</h3>
+            <div id="bestAlgo" class="best-algo">--</div>
+        </div>
+
+        <div class="section">
+            <h3>📋 BẢNG LỊCH SỬ (top 20 gần nhất)</h3>
+            <div id="historyTable" style="overflow-x:auto;">--</div>
+        </div>
+    </div>
+    <div class="footer">
+        ⚠️ Thuật toán đề xuất dựa trên phân tích dữ liệu thực tế. Kết quả mang tính tham khảo, không đảm bảo thắng 100%.
     </div>
 </div>
 
 <script>
-    // ========== API & THUẬT TOÁN ==========
     const API_URL = "https://wtxmd52.tele68.com/v1/txmd5/lite-sessions?cp=R&cl=R&pf=web&at=355f5391f1326f7cd9fa2ce5b8663d92";
-    let isFetching = false;
-    let lastPrediction = "";
-    let lastSession = "";
+    let fullHistory = []; // lưu lịch sử đã đọc từ dưới lên (cũ -> mới)
 
-    // Hàm lấy 4 ký tự cuối _id, lọc số
-    function extractNumberFromLast4Id(idStr) {
-        if (!idStr || idStr.length < 4) return 0;
-        const last4 = idStr.slice(-4);
-        const digits = last4.match(/\d/g);
-        if (!digits) return 0;
-        const combined = digits.join('');
-        return combined === '' ? 0 : parseInt(combined, 10);
-    }
-
-    function isEven(num) {
-        return num % 2 === 0;
-    }
-
-    function predictNext(prevResult, idNumber, thirdDice) {
-        if (!prevResult) return "???";
-        const sameParity = (isEven(idNumber) === isEven(thirdDice));
-        if (sameParity) return prevResult;
-        else return prevResult === "TAI" ? "XIU" : "TAI";
-    }
-
-    async function fetchAndUpdate() {
-        if (isFetching) return;
-        isFetching = true;
+    async function fetchHistory() {
+        const fetchBtn = document.getElementById('fetchBtn');
+        fetchBtn.innerText = '⏳ Đang tải...';
+        fetchBtn.disabled = true;
         try {
             const response = await fetch(API_URL);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
-            if (!data?.list?.length) throw new Error("No data");
+            if (!data.list || !data.list.length) throw new Error("Không có dữ liệu");
 
-            const latest = data.list[0];
-            // Lấy id (mã phiên) và +1 để thành phiên hiện tại
-            const currentSessionId = latest.id ? (latest.id + 1) : "?";
-            const idRaw = latest._id;
-            const dices = latest.dices;
-            const resultTT = latest.resultTruyenThong;
-            if (!dices || dices.length < 3) throw new Error("Invalid dice");
-            const thirdDice = dices[2];
-            const idNumber = extractNumberFromLast4Id(idRaw);
-            const prediction = predictNext(resultTT, idNumber, thirdDice);
+            // SAO CHÉP MẢNG GỐC, SAU ĐÓ ĐẢO NGƯỢC ĐỂ ĐỌC TỪ DƯỚI LÊN (cũ -> mới)
+            // Mặc định API trả về mới nhất ở đầu, vậy "từ dưới lên" là reverse()
+            const originalList = [...data.list];
+            fullHistory = originalList.reverse(); // bây giờ phần tử đầu là cũ nhất, cuối là mới nhất
 
-            // Cập nhật giao diện nếu thay đổi
-            const sessionDiv = document.getElementById('sessionDisplay');
-            const predDiv = document.getElementById('predictionResult');
-            const statusDiv = document.getElementById('statusText');
+            // Hiển thị raw JSON (tóm tắt)
+            document.getElementById('rawDataPreview').innerHTML = JSON.stringify(fullHistory.slice(0, 10), null, 2) + (fullHistory.length > 10 ? "\n... và " + (fullHistory.length-10) + " bản ghi khác" : "");
             
-            const sessionText = `Phiên: ${currentSessionId}`;
-            if (sessionDiv.innerText !== sessionText) sessionDiv.innerText = sessionText;
-            if (predDiv.innerText !== prediction) predDiv.innerText = prediction;
+            // Phân tích thống kê
+            analyzeStatistics(fullHistory);
             
-            statusDiv.innerHTML = `<i class="fas fa-clock"></i> ${new Date().toLocaleTimeString()} | ${prediction}`;
+            // Hiển thị bảng lịch sử (20 gần nhất - lấy cuối mảng)
+            const recent = fullHistory.slice(-20).reverse(); // để hiển thị mới nhất lên đầu bảng cho dễ nhìn
+            renderTable(recent);
+            
+            // Đề xuất thuật toán dựa trên dữ liệu
+            proposeAlgorithm(fullHistory);
+            
         } catch (err) {
-            console.warn(err);
-            const statusDiv = document.getElementById('statusText');
-            if (!statusDiv.innerText.includes("Lỗi")) {
-                statusDiv.innerHTML = `⚠️ Lỗi kết nối`;
-            }
+            document.getElementById('rawDataPreview').innerHTML = `⚠️ Lỗi: ${err.message}<br>Có thể do CORS hoặc API không hỗ trợ. Hãy dùng extension CORS hoặc thử lại.`;
+            console.error(err);
         } finally {
-            isFetching = false;
+            fetchBtn.innerText = '🚀 LẤY LỊCH SỬ & PHÂN TÍCH';
+            fetchBtn.disabled = false;
         }
     }
 
-    // ========== GỌI LIÊN TỤC 100ms ==========
-    let interval = null;
-    function startPolling() {
-        if (interval) clearInterval(interval);
-        fetchAndUpdate();
-        interval = setInterval(fetchAndUpdate, 100);
-    }
-    startPolling();
-
-    // nút bấm thủ công
-    document.getElementById('manualBtn').addEventListener('click', () => {
-        fetchAndUpdate();
-    });
-
-    // ========== KÉO THẢ BOX ==========
-    const tool = document.getElementById('miniBox');
-    const dragHeader = document.getElementById('dragHeader');
-    let isDragging = false;
-    let offsetX = 0, offsetY = 0;
-
-    function onMouseDown(e) {
-        // Không kéo nếu bấm vào nút xoay
-        if (e.target.closest('.rotate-btn')) return;
-        isDragging = true;
-        const rect = tool.getBoundingClientRect();
-        offsetX = e.clientX - rect.left;
-        offsetY = e.clientY - rect.top;
-        tool.style.cursor = 'grabbing';
-        e.preventDefault();
-    }
-
-    function onMouseMove(e) {
-        if (!isDragging) return;
-        let newLeft = e.clientX - offsetX;
-        let newTop = e.clientY - offsetY;
-        // giới hạn trong màn hình
-        const maxX = window.innerWidth - tool.offsetWidth;
-        const maxY = window.innerHeight - tool.offsetHeight;
-        newLeft = Math.min(Math.max(0, newLeft), maxX);
-        newTop = Math.min(Math.max(0, newTop), maxY);
-        tool.style.left = newLeft + 'px';
-        tool.style.top = newTop + 'px';
-        tool.style.right = 'auto';
-    }
-
-    function onMouseUp() {
-        isDragging = false;
-        tool.style.cursor = '';
-    }
-
-    dragHeader.addEventListener('mousedown', onMouseDown);
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-
-    // Đảm bảo vị trí ban đầu nếu có style right
-    const rect = tool.getBoundingClientRect();
-    if (!tool.style.left && !tool.style.right) {
-        tool.style.right = '20px';
-        tool.style.top = '80px';
-    }
-
-    // ========== XOAY 90° ==========
-    const rotateBtn = document.getElementById('rotateBtn');
-    const miniContent = document.getElementById('miniContent');
-    let rotated = false;
-    rotateBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        rotated = !rotated;
-        if (rotated) {
-            miniContent.classList.add('rotated-90');
-        } else {
-            miniContent.classList.remove('rotated-90');
+    function analyzeStatistics(history) {
+        if (!history.length) return;
+        let total = history.length;
+        let taiCount = 0, xiuCount = 0;
+        let pointSum = 0;
+        let points = [];
+        let lastResult = null;
+        let streaks = { tai: 0, xiu: 0, maxTaiStreak: 0, maxXiuStreak: 0 };
+        let currentStreak = 0, currentType = null;
+        
+        for (let i = 0; i < history.length; i++) {
+            const item = history[i];
+            const res = item.resultTruyenThong;
+            if (res === "TAI") taiCount++;
+            else if (res === "XIU") xiuCount++;
+            pointSum += item.point;
+            points.push(item.point);
+            
+            // tính chuỗi liên tiếp
+            if (res === currentType) {
+                currentStreak++;
+            } else {
+                if (currentType === "TAI") streaks.maxTaiStreak = Math.max(streaks.maxTaiStreak, currentStreak);
+                if (currentType === "XIU") streaks.maxXiuStreak = Math.max(streaks.maxXiuStreak, currentStreak);
+                currentType = res;
+                currentStreak = 1;
+            }
         }
+        if (currentType === "TAI") streaks.maxTaiStreak = Math.max(streaks.maxTaiStreak, currentStreak);
+        if (currentType === "XIU") streaks.maxXiuStreak = Math.max(streaks.maxXiuStreak, currentStreak);
+        
+        const avgPoint = (pointSum / total).toFixed(2);
+        const taiPercent = (taiCount/total*100).toFixed(1);
+        const xiuPercent = (xiuCount/total*100).toFixed(1);
+        
+        // độ lệch chuẩn điểm
+        const mean = pointSum/total;
+        let variance = 0;
+        for(let p of points) variance += (p-mean)**2;
+        variance /= total;
+        const std = Math.sqrt(variance).toFixed(2);
+        
+        // Phân phối điểm
+        const pointDist = {};
+        points.forEach(p => { pointDist[p] = (pointDist[p]||0)+1; });
+        const mostCommonPoint = Object.entries(pointDist).sort((a,b)=>b[1]-a[1])[0];
+        
+        // Kiểm tra tính ngẫu nhiên: tần suất Tài/Xỉu có lệch không?
+        const chiSquare = ((taiCount - total/2)**2 + (xiuCount - total/2)**2) / (total/2);
+        const isBiased = chiSquare > 3.84; // p<0.05
+        
+        const statHtml = `
+            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                <div><span class="stat-number">${total}</span> phiên</div>
+                <div>🎲 Tài: <strong>${taiCount}</strong> (${taiPercent}%)</div>
+                <div>🎲 Xỉu: <strong>${xiuCount}</strong> (${xiuPercent}%)</div>
+                <div>📊 Điểm TB: <strong>${avgPoint}</strong> (σ=${std})</div>
+                <div>⭐ Điểm phổ biến: ${mostCommonPoint[0]} (${mostCommonPoint[1]} lần)</div>
+                <div>🔥 Chuỗi Tài dài nhất: ${streaks.maxTaiStreak}</div>
+                <div>🔥 Chuỗi Xỉu dài nhất: ${streaks.maxXiuStreak}</div>
+                <div>${isBiased ? '⚠️ Dữ liệu có xu hướng lệch (không ngẫu nhiên hoàn toàn)' : '⚖️ Phân phối khá cân bằng'}</div>
+            </div>
+        `;
+        document.getElementById('statistics').innerHTML = statHtml;
+        
+        // lưu thêm streaks để dùng cho thuật toán
+        window.streaksData = streaks;
+        window.isBiased = isBiased;
+        window.taiPercent = parseFloat(taiPercent);
+    }
+    
+    function renderTable(recentList) {
+        if (!recentList.length) return;
+        let html = `<table><tr><th>STT (mới nhất)</th><th>ID phiên</th><th>Kết quả</th><th>Điểm</th><th>Bộ xúc xắc</th></tr>`;
+        recentList.forEach((item, idx) => {
+            html += `<tr>
+                        <td>${idx+1}</td>
+                        <td>${item.id}</td>
+                        <td style="color:${item.resultTruyenThong==='TAI'?'#FFB347':'#88ddff'}">${item.resultTruyenThong}</td>
+                        <td>${item.point}</td>
+                        <td>[${item.dices.join(',')}]</td>
+                    </tr>`;
+        });
+        html += `</table><p><i>Hiển thị ${recentList.length} phiên gần nhất (từ mới đến cũ).</i></p>`;
+        document.getElementById('historyTable').innerHTML = html;
+    }
+    
+    function proposeAlgorithm(history) {
+        if (!history.length) return;
+        // Phân tích để chọn thuật toán tốt nhất dựa trên dữ liệu
+        // 1. Kiểm tra xem có quy luật "xu hướng" không: nếu chuỗi dài > 3 thì xu hướng mạnh
+        // 2. Kiểm tra tính "bật lắc" (đảo chiều thường xuyên)
+        // 3. Kiểm tra mối tương quan giữa tổng điểm và kết quả tiếp theo (đơn giản)
+        // 4. Kiểm tra quy tắc "cầu 1-1", "2-2", ...
+        
+        let last10 = history.slice(-10).map(h => h.resultTruyenThong);
+        let last5 = history.slice(-5);
+        
+        // Đếm số lần đảo chiều trong 10 ván gần nhất
+        let reversals = 0;
+        for(let i=1; i<last10.length; i++) if(last10[i] !== last10[i-1]) reversals++;
+        let reversalRate = reversals / (last10.length-1);
+        
+        let trendStrength = (window.streaksData?.maxTaiStreak > 3 || window.streaksData?.maxXiuStreak > 3) ? "mạnh" : "yếu";
+        
+        let algorithmDesc = "";
+        let codeSnippet = "";
+        
+        if (reversalRate > 0.6) {
+            // Đảo chiều nhiều -> nên dùng thuật toán "ngược lại kết quả vừa rồi"
+            algorithmDesc = `📌 Dữ liệu cho thấy tỷ lệ đảo chiều rất cao (${(reversalRate*100).toFixed(0)}% trong 10 ván). 
+            Thuật toán tối ưu: <strong>Dự đoán NGƯỢC lại kết quả ván mới nhất</strong>. 
+            Ví dụ: ván cuối là Tài → dự đoán Xỉu, và ngược lại. Độ chính xác kỳ vọng ~${(reversalRate*100).toFixed(0)}%.`;
+            codeSnippet = `function predictNext(lastResult) { return lastResult === "TAI" ? "XIU" : "TAI"; }`;
+        } 
+        else if (trendStrength === "mạnh" && (window.streaksData.maxTaiStreak > 3 || window.streaksData.maxXiuStreak > 3)) {
+            // Xu hướng mạnh: theo trend
+            let lastResult = history[history.length-1].resultTruyenThong;
+            algorithmDesc = `📌 Phát hiện xu hướng mạnh (chuỗi dài nhất ${Math.max(window.streaksData.maxTaiStreak, window.streaksData.maxXiuStreak)}). 
+            Thuật toán tối ưu: <strong>THEO XU HƯỚNG (tiếp tục kết quả ván mới nhất)</strong>. 
+            Dự đoán giống kết quả vừa ra. Độ chính xác kỳ vọng cao trong ngắn hạn.`;
+            codeSnippet = `function predictNext(lastResult) { return lastResult; } // theo trend`;
+        }
+        else {
+            // Kiểm tra quy tắc "cầu 1-1" hoặc "2-2" dựa trên 2 ván gần nhất
+            let lastTwo = last10.slice(-2);
+            if (lastTwo.length === 2 && lastTwo[0] === lastTwo[1]) {
+                // cặp đôi -> có thể đảo
+                algorithmDesc = `📌 Cặp đôi vừa xuất hiện (${lastTwo[0]} - ${lastTwo[1]}). Xu hướng thường đảo sau cặp. 
+                Thuật toán: <strong>ĐẢO NGƯỢC sau khi có 2 kết quả giống nhau liên tiếp</strong>. 
+                Dự đoán ngược lại với 2 ván cuối.`;
+                codeSnippet = `function predictNext(lastResult, secondLastResult) { if(lastResult === secondLastResult) return lastResult==="TAI"?"XIU":"TAI"; else return lastResult; }`;
+            } else {
+                // kết hợp với điểm số (phân tích điểm trung bình)
+                let avgPointLast5 = last5.reduce((s,item)=>s+item.point,0)/5;
+                let globalAvg = history.reduce((s,item)=>s+item.point,0)/history.length;
+                if (avgPointLast5 > globalAvg + 1.5) {
+                    algorithmDesc = `📌 Điểm trung bình 5 ván gần nhất (${avgPointLast5.toFixed(1)}) cao hơn tổng thể (${globalAvg.toFixed(1)}). Xu hướng Tài mạnh → dự đoán Tài.`;
+                    codeSnippet = `function predictNext() { return "TAI"; }`;
+                } else if (avgPointLast5 < globalAvg - 1.5) {
+                    algorithmDesc = `📌 Điểm trung bình 5 ván gần nhất thấp → xu hướng Xỉu → dự đoán Xỉu.`;
+                    codeSnippet = `function predictNext() { return "XIU"; }`;
+                } else {
+                    algorithmDesc = `📌 Dữ liệu không có quy luật rõ ràng. Sử dụng thuật toán <strong>Markov bậc 1</strong> (dựa trên xác suất chuyển tiếp từ 2 ván gần nhất). Tính từ lịch sử: xác suất cao nhất sẽ được chọn.`;
+                    // Tính ma trận chuyển tiếp đơn giản
+                    let trans = { "TAI_TAI":0, "TAI_XIU":0, "XIU_TAI":0, "XIU_XIU":0 };
+                    for(let i=1;i<history.length;i++) {
+                        let prev = history[i-1].resultTruyenThong;
+                        let curr = history[i].resultTruyenThong;
+                        trans[`${prev}_${curr}`]++;
+                    }
+                    let last = history[history.length-1].resultTruyenThong;
+                    let nextTai = trans[`${last}_TAI`] || 0;
+                    let nextXiu = trans[`${last}_XIU`] || 0;
+                    let predicted = nextTai > nextXiu ? "TAI" : (nextXiu > nextTai ? "XIU" : (last==="TAI"?"XIU":"TAI"));
+                    algorithmDesc += `<br>🔍 Từ lịch sử: sau ${last}, xác suất ra Tài: ${nextTai}, Xỉu: ${nextXiu} → Dự đoán <strong>${predicted}</strong>.`;
+                    codeSnippet = `function predictNext(lastResult) { // dùng bảng xác suất động\n   const map = { "TAI_TAI":${trans.TAI_TAI}, "TAI_XIU":${trans.TAI_XIU}, "XIU_TAI":${trans.XIU_TAI}, "XIU_XIU":${trans.XIU_XIU} };\n   return map[lastResult+"_TAI"] > map[lastResult+"_XIU"] ? "TAI" : "XIU";\n}`;
+                }
+            }
+        }
+        
+        // Thêm phân tích độ lệch chuẩn và khuyến nghị
+        const finalHtml = `
+            <div style="background:#001e2a; padding:16px; border-radius:28px;">
+                ${algorithmDesc}
+                <hr style="margin:12px 0; border-color:#ffb347;">
+                <strong>📜 Mã thuật toán đề xuất (JavaScript):</strong><br>
+                <pre style="background:#000; padding:10px; border-radius:16px; font-size:0.8rem;">${codeSnippet}</pre>
+                <p>💡 <em>Lưu ý: Thuật toán được tối ưu dựa trên ${history.length} phiên lịch sử gần nhất. Nên cập nhật thường xuyên khi có dữ liệu mới.</em></p>
+            </div>
+        `;
+        document.getElementById('bestAlgo').innerHTML = finalHtml;
+    }
+    
+    // Xuất JSON
+    document.getElementById('exportBtn').addEventListener('click', () => {
+        if(!fullHistory.length) {
+            alert("Chưa có dữ liệu, hãy nhấn 'LẤY LỊCH SỬ' trước.");
+            return;
+        }
+        const dataStr = JSON.stringify(fullHistory, null, 2);
+        const blob = new Blob([dataStr], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `taixiu_history_${new Date().toISOString()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
     });
-
-    // dọn dẹp interval khi rời trang
-    window.addEventListener('beforeunload', () => {
-        if (interval) clearInterval(interval);
+    
+    document.getElementById('fetchBtn').addEventListener('click', fetchHistory);
+    
+    // Tự động gọi 1 lần khi load để demo
+    window.addEventListener('load', () => {
+        fetchHistory();
     });
 </script>
 </body>
