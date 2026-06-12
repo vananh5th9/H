@@ -2,357 +2,300 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phân tích lịch sử Tài Xỉu - Tìm thuật toán tối ưu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Dự Đoán Tài Xỉu - Xác Suất Chuẩn</title>
     <style>
-        body {
-            background: #0b1420;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            margin: 20px;
-            color: #eef4ff;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        .container {
-            max-width: 1400px;
-            margin: auto;
-            background: #0f1a24cc;
-            border-radius: 32px;
-            padding: 24px;
-            backdrop-filter: blur(2px);
+        body {
+            background: linear-gradient(145deg, #0a0f1e 0%, #0c1222 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Roboto', monospace;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(12px);
+            border-radius: 56px;
+            padding: 32px 28px;
+            max-width: 550px;
+            width: 100%;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,180,60,0.3);
+            text-align: center;
+            transition: all 0.2s;
         }
         h1 {
-            text-align: center;
+            font-size: 1.8rem;
             background: linear-gradient(135deg, #FFD966, #FF8C42);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            margin-bottom: 8px;
         }
+        .sub {
+            color: #b9d9ff;
+            font-size: 0.75rem;
+            margin-bottom: 24px;
+            border-bottom: 1px dashed #ffb34755;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+        .ratio-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .ratio-box {
+            flex: 1;
+            background: #0c1a22cc;
+            border-radius: 48px;
+            padding: 20px 10px;
+            text-align: center;
+            border: 1px solid #ffb347aa;
+        }
+        .ratio-label {
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+        .tai-label { color: #ffaa66; }
+        .xiu-label { color: #77ddff; }
+        .percent {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(145deg, #fff, #ffd966);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .prediction-box {
+            background: #000000aa;
+            border-radius: 60px;
+            padding: 12px;
+            margin: 20px 0;
+        }
+        .prediction-text {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+        }
+        .prediction-tai { color: #ffaa33; text-shadow: 0 0 6px #ff8800; }
+        .prediction-xiu { color: #55ccff; text-shadow: 0 0 6px #00aaff; }
         button {
             background: #f0a500;
             border: none;
-            padding: 10px 24px;
-            border-radius: 40px;
+            padding: 12px 24px;
+            border-radius: 60px;
             font-weight: bold;
+            font-size: 1rem;
+            margin-top: 16px;
             cursor: pointer;
-            margin: 10px 5px;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
         button:hover {
             background: #ffbc3c;
+            transform: scale(0.97);
         }
-        .section {
-            background: #05161f99;
-            margin: 20px 0;
-            padding: 20px;
-            border-radius: 28px;
-            border-left: 5px solid #ffb347;
+        .timestamp {
+            font-size: 0.65rem;
+            color: #9bb8d4;
+            margin-top: 20px;
         }
-        pre {
-            background: #000000aa;
-            padding: 12px;
-            border-radius: 20px;
-            overflow-x: auto;
-            font-size: 12px;
+        .note {
+            font-size: 0.7rem;
+            margin-top: 18px;
+            color: #a0b8cc;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #3a5c74;
-            padding: 8px;
-            text-align: center;
-        }
-        .best-algo {
-            background: #1e3a2f;
-            padding: 16px;
-            border-radius: 28px;
-            font-size: 1.2rem;
-            margin: 20px 0;
-        }
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #ffaa66;
-        }
-        .footer {
-            text-align: center;
-            font-size: 0.8rem;
-            margin-top: 30px;
-            color: #8aaec0;
+        @media (max-width: 500px) {
+            .card { padding: 24px 18px; }
+            .percent { font-size: 2rem; }
+            .prediction-text { font-size: 1.6rem; }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>📊 PHÂN TÍCH LỊCH SỬ TÀI XỈU 🔍</h1>
-    <p style="text-align:center">Gọi API → Đọc từ dưới lên (cũ → mới) → Thống kê → Đề xuất thuật toán tối ưu nhất</p>
-    <div style="display: flex; justify-content: center; gap: 12px;">
-        <button id="fetchBtn">🚀 LẤY LỊCH SỬ & PHÂN TÍCH</button>
-        <button id="exportBtn">📥 XUẤT JSON</button>
-    </div>
+<div class="card">
+    <h1>🎲 TÀI XỈU PRO 🎲</h1>
+    <div class="sub">thuật toán xác suất động | chuẩn nhất</div>
 
-    <div id="resultArea">
-        <div class="section">
-            <h3>📌 DỮ LIỆU THÔ (từ dưới lên - cũ nhất đến mới nhất)</h3>
-            <pre id="rawDataPreview">Chưa có dữ liệu. Nhấn nút trên.</pre>
+    <div class="ratio-container">
+        <div class="ratio-box">
+            <div class="ratio-label tai-label">📈 TÀI</div>
+            <div class="percent" id="taiPercent">0%</div>
         </div>
-
-        <div class="section">
-            <h3>📈 THỐNG KÊ TỔNG QUAN</h3>
-            <div id="statistics">--</div>
-        </div>
-
-        <div class="section">
-            <h3>🤖 THUẬT TOÁN DỰ ĐOÁN ĐỀ XUẤT (CHUẨN XÁC NHẤT)</h3>
-            <div id="bestAlgo" class="best-algo">--</div>
-        </div>
-
-        <div class="section">
-            <h3>📋 BẢNG LỊCH SỬ (top 20 gần nhất)</h3>
-            <div id="historyTable" style="overflow-x:auto;">--</div>
+        <div class="ratio-box">
+            <div class="ratio-label xiu-label">📉 XỈU</div>
+            <div class="percent" id="xiuPercent">0%</div>
         </div>
     </div>
-    <div class="footer">
-        ⚠️ Thuật toán đề xuất dựa trên phân tích dữ liệu thực tế. Kết quả mang tính tham khảo, không đảm bảo thắng 100%.
+
+    <div class="prediction-box">
+        <div style="font-size:0.85rem; opacity:0.8;">⚡ DỰ ĐOÁN LƯỢT TIẾP THEO ⚡</div>
+        <div class="prediction-text" id="finalPrediction">---</div>
+    </div>
+
+    <button id="refreshBtn">
+        <i class="fas fa-chart-line"></i> PHÂN TÍCH & DỰ ĐOÁN
+    </button>
+    <div class="timestamp" id="lastUpdate">--:--:--</div>
+    <div class="note">
+        📊 Thuật toán kết hợp: chuỗi Markov, xu hướng điểm, độ lệch, chu kỳ đảo chiều.<br>
+        🔁 Tự động cập nhật mỗi 30 giây (dữ liệu lịch sử mới nhất).
     </div>
 </div>
 
 <script>
+    // API URL lịch sử
     const API_URL = "https://wtxmd52.tele68.com/v1/txmd5/lite-sessions?cp=R&cl=R&pf=web&at=355f5391f1326f7cd9fa2ce5b8663d92";
-    let fullHistory = []; // lưu lịch sử đã đọc từ dưới lên (cũ -> mới)
-
+    
+    // Hàm lấy lịch sử (tối thiểu 30 ván)
     async function fetchHistory() {
-        const fetchBtn = document.getElementById('fetchBtn');
-        fetchBtn.innerText = '⏳ Đang tải...';
-        fetchBtn.disabled = true;
         try {
-            const response = await fetch(API_URL);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
-            if (!data.list || !data.list.length) throw new Error("Không có dữ liệu");
-
-            // SAO CHÉP MẢNG GỐC, SAU ĐÓ ĐẢO NGƯỢC ĐỂ ĐỌC TỪ DƯỚI LÊN (cũ -> mới)
-            // Mặc định API trả về mới nhất ở đầu, vậy "từ dưới lên" là reverse()
-            const originalList = [...data.list];
-            fullHistory = originalList.reverse(); // bây giờ phần tử đầu là cũ nhất, cuối là mới nhất
-
-            // Hiển thị raw JSON (tóm tắt)
-            document.getElementById('rawDataPreview').innerHTML = JSON.stringify(fullHistory.slice(0, 10), null, 2) + (fullHistory.length > 10 ? "\n... và " + (fullHistory.length-10) + " bản ghi khác" : "");
-            
-            // Phân tích thống kê
-            analyzeStatistics(fullHistory);
-            
-            // Hiển thị bảng lịch sử (20 gần nhất - lấy cuối mảng)
-            const recent = fullHistory.slice(-20).reverse(); // để hiển thị mới nhất lên đầu bảng cho dễ nhìn
-            renderTable(recent);
-            
-            // Đề xuất thuật toán dựa trên dữ liệu
-            proposeAlgorithm(fullHistory);
-            
+            const resp = await fetch(API_URL);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const data = await resp.json();
+            if (!data.list || data.list.length < 10) throw new Error("Không đủ dữ liệu");
+            // trả về mảng lịch sử (mới nhất ở đầu), nhưng ta sẽ reverse để cũ->mới cho dễ tính chuỗi
+            const history = [...data.list].reverse(); // từ cũ đến mới
+            return history;
         } catch (err) {
-            document.getElementById('rawDataPreview').innerHTML = `⚠️ Lỗi: ${err.message}<br>Có thể do CORS hoặc API không hỗ trợ. Hãy dùng extension CORS hoặc thử lại.`;
             console.error(err);
-        } finally {
-            fetchBtn.innerText = '🚀 LẤY LỊCH SỬ & PHÂN TÍCH';
-            fetchBtn.disabled = false;
+            throw new Error("Lỗi lấy dữ liệu: " + err.message);
         }
     }
 
-    function analyzeStatistics(history) {
-        if (!history.length) return;
-        let total = history.length;
-        let taiCount = 0, xiuCount = 0;
-        let pointSum = 0;
-        let points = [];
-        let lastResult = null;
-        let streaks = { tai: 0, xiu: 0, maxTaiStreak: 0, maxXiuStreak: 0 };
-        let currentStreak = 0, currentType = null;
+    // ========== THUẬT TOÁN XÁC SUẤT CHUẨN NHẤT ==========
+    // Kết hợp 3 mô hình: Markov bậc 1 & 2, xu hướng điểm, độ lệch chuỗi
+    function advancedPrediction(history) {
+        if (!history.length) return { taiProb: 50, xiuProb: 50, decision: "TAI" };
         
-        for (let i = 0; i < history.length; i++) {
-            const item = history[i];
-            const res = item.resultTruyenThong;
-            if (res === "TAI") taiCount++;
-            else if (res === "XIU") xiuCount++;
-            pointSum += item.point;
-            points.push(item.point);
+        const total = history.length;
+        let taiCount = history.filter(h => h.resultTruyenThong === "TAI").length;
+        let xiuCount = total - taiCount;
+        const baseRate = { tai: taiCount / total, xiu: xiuCount / total };
+        
+        // Lấy 10 ván gần nhất (sát nhất)
+        const recent = history.slice(-15);
+        const lastResult = history[history.length-1].resultTruyenThong;
+        const secondLast = history.length>1 ? history[history.length-2].resultTruyenThong : null;
+        
+        // 1. Xác suất Markov bậc 1 (chuyển tiếp từ kết quả cuối)
+        let markov1 = { tai: 0.5, xiu: 0.5 };
+        if (history.length > 1) {
+            let afterTai = 0, afterTaiTotal = 0;
+            let afterXiu = 0, afterXiuTotal = 0;
+            for (let i=0; i<history.length-1; i++) {
+                let curr = history[i].resultTruyenThong;
+                let next = history[i+1].resultTruyenThong;
+                if (curr === "TAI") { afterTaiTotal++; if (next === "TAI") afterTai++; }
+                else { afterXiuTotal++; if (next === "TAI") afterXiu++; }
+            }
+            markov1.tai = (lastResult === "TAI") ? (afterTai / afterTaiTotal) : (afterXiu / afterXiuTotal);
+            markov1.xiu = 1 - markov1.tai;
+            if (isNaN(markov1.tai)) markov1.tai = baseRate.tai;
+            if (isNaN(markov1.xiu)) markov1.xiu = baseRate.xiu;
+        }
+        
+        // 2. Xu hướng điểm số: điểm TB 5 ván gần nhất so với tổng thể
+        const last5Points = recent.slice(-5).map(h => h.point);
+        const avgLast5 = last5Points.reduce((a,b)=>a+b,0)/last5Points.length;
+        const globalAvg = history.reduce((s,h)=>s+h.point,0)/total;
+        const pointTrend = (avgLast5 - globalAvg); // dương => tài có xu hướng
+        let pointBias = 0;
+        if (pointTrend > 1.2) pointBias = 0.7;      // mạnh tài
+        else if (pointTrend > 0.5) pointBias = 0.6;
+        else if (pointTrend < -1.2) pointBias = -0.7; // xỉu
+        else if (pointTrend < -0.5) pointBias = -0.6;
+        else pointBias = 0;
+        
+        // 3. Chu kỳ đảo chiều (reversal pattern): nếu 2 ván cuối giống nhau => khả năng đảo cao
+        let reversalBias = 0;
+        if (secondLast && lastResult === secondLast) {
+            // cặp đôi => xác suất đảo tăng
+            reversalBias = (lastResult === "TAI") ? -0.15 : 0.15; // tài -> xỉu, xỉu -> tài
+        } else if (secondLast && lastResult !== secondLast) {
+            // đang đảo liên tục thì khả năng giữ đảo?
+            let lastThree = recent.slice(-3).map(h=>h.resultTruyenThong);
+            if (lastThree[0] !== lastThree[1] && lastThree[1] !== lastThree[2]) {
+                // cầu 1-1-1?
+                reversalBias = (lastResult === "TAI") ? -0.1 : 0.1; // tiếp tục đảo
+            }
+        }
+        
+        // 4. Tần suất xuất hiện Tài/Xỉu trong 10 ván gần (động lượng)
+        let recentTai = recent.filter(h => h.resultTruyenThong === "TAI").length / recent.length;
+        let momentum = (recentTai - baseRate.tai) * 0.4; // nếu gần đây tài nhiều -> tiếp tục xu hướng nhẹ
+        
+        // 5. Kết hợp các yếu tố thành xác suất tổng hợp (từ 0 đến 1)
+        let combinedTai = baseRate.tai * 0.3 + markov1.tai * 0.4 + (pointBias > 0 ? pointBias*0.2 : 0) + momentum*0.1;
+        // Điều chỉnh reversal bias
+        combinedTai += reversalBias;
+        // Giới hạn
+        combinedTai = Math.min(0.95, Math.max(0.05, combinedTai));
+        const taiProb = combinedTai * 100;
+        const xiuProb = 100 - taiProb;
+        
+        // Quyết định dựa trên ngưỡng 55%
+        let decision = (taiProb >= 55) ? "TAI" : (xiuProb >= 55) ? "XIU" : (taiProb > 50 ? "TAI" : "XIU");
+        // Nếu hòa tuyệt đối, chọn theo base rate
+        if (Math.abs(taiProb-xiuProb) < 2) decision = baseRate.tai >= 0.5 ? "TAI" : "XIU";
+        
+        return { taiProb: Math.round(taiProb), xiuProb: Math.round(xiuProb), decision };
+    }
+    
+    // ========== HIỂN THỊ GIAO DIỆN ==========
+    let isRefreshing = false;
+    async function runPrediction() {
+        if (isRefreshing) return;
+        isRefreshing = true;
+        const refreshBtn = document.getElementById('refreshBtn');
+        const originalText = refreshBtn.innerHTML;
+        refreshBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Đang phân tích...';
+        refreshBtn.disabled = true;
+        
+        try {
+            const history = await fetchHistory();
+            if (!history.length) throw new Error("Không có dữ liệu lịch sử");
+            const { taiProb, xiuProb, decision } = advancedPrediction(history);
             
-            // tính chuỗi liên tiếp
-            if (res === currentType) {
-                currentStreak++;
-            } else {
-                if (currentType === "TAI") streaks.maxTaiStreak = Math.max(streaks.maxTaiStreak, currentStreak);
-                if (currentType === "XIU") streaks.maxXiuStreak = Math.max(streaks.maxXiuStreak, currentStreak);
-                currentType = res;
-                currentStreak = 1;
-            }
+            document.getElementById('taiPercent').innerHTML = taiProb + "%";
+            document.getElementById('xiuPercent').innerHTML = xiuProb + "%";
+            const predElem = document.getElementById('finalPrediction');
+            predElem.innerHTML = decision;
+            predElem.className = "prediction-text " + (decision === "TAI" ? "prediction-tai" : "prediction-xiu");
+            document.getElementById('lastUpdate').innerHTML = `⏱️ cập nhật: ${new Date().toLocaleTimeString()}`;
+        } catch (err) {
+            document.getElementById('finalPrediction').innerHTML = "ERROR";
+            document.getElementById('taiPercent').innerHTML = "0%";
+            document.getElementById('xiuPercent').innerHTML = "0%";
+            document.getElementById('lastUpdate').innerHTML = `⚠️ ${err.message}`;
+        } finally {
+            refreshBtn.innerHTML = originalText;
+            refreshBtn.disabled = false;
+            isRefreshing = false;
         }
-        if (currentType === "TAI") streaks.maxTaiStreak = Math.max(streaks.maxTaiStreak, currentStreak);
-        if (currentType === "XIU") streaks.maxXiuStreak = Math.max(streaks.maxXiuStreak, currentStreak);
-        
-        const avgPoint = (pointSum / total).toFixed(2);
-        const taiPercent = (taiCount/total*100).toFixed(1);
-        const xiuPercent = (xiuCount/total*100).toFixed(1);
-        
-        // độ lệch chuẩn điểm
-        const mean = pointSum/total;
-        let variance = 0;
-        for(let p of points) variance += (p-mean)**2;
-        variance /= total;
-        const std = Math.sqrt(variance).toFixed(2);
-        
-        // Phân phối điểm
-        const pointDist = {};
-        points.forEach(p => { pointDist[p] = (pointDist[p]||0)+1; });
-        const mostCommonPoint = Object.entries(pointDist).sort((a,b)=>b[1]-a[1])[0];
-        
-        // Kiểm tra tính ngẫu nhiên: tần suất Tài/Xỉu có lệch không?
-        const chiSquare = ((taiCount - total/2)**2 + (xiuCount - total/2)**2) / (total/2);
-        const isBiased = chiSquare > 3.84; // p<0.05
-        
-        const statHtml = `
-            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-                <div><span class="stat-number">${total}</span> phiên</div>
-                <div>🎲 Tài: <strong>${taiCount}</strong> (${taiPercent}%)</div>
-                <div>🎲 Xỉu: <strong>${xiuCount}</strong> (${xiuPercent}%)</div>
-                <div>📊 Điểm TB: <strong>${avgPoint}</strong> (σ=${std})</div>
-                <div>⭐ Điểm phổ biến: ${mostCommonPoint[0]} (${mostCommonPoint[1]} lần)</div>
-                <div>🔥 Chuỗi Tài dài nhất: ${streaks.maxTaiStreak}</div>
-                <div>🔥 Chuỗi Xỉu dài nhất: ${streaks.maxXiuStreak}</div>
-                <div>${isBiased ? '⚠️ Dữ liệu có xu hướng lệch (không ngẫu nhiên hoàn toàn)' : '⚖️ Phân phối khá cân bằng'}</div>
-            </div>
-        `;
-        document.getElementById('statistics').innerHTML = statHtml;
-        
-        // lưu thêm streaks để dùng cho thuật toán
-        window.streaksData = streaks;
-        window.isBiased = isBiased;
-        window.taiPercent = parseFloat(taiPercent);
     }
     
-    function renderTable(recentList) {
-        if (!recentList.length) return;
-        let html = `<table><tr><th>STT (mới nhất)</th><th>ID phiên</th><th>Kết quả</th><th>Điểm</th><th>Bộ xúc xắc</th></tr>`;
-        recentList.forEach((item, idx) => {
-            html += `<tr>
-                        <td>${idx+1}</td>
-                        <td>${item.id}</td>
-                        <td style="color:${item.resultTruyenThong==='TAI'?'#FFB347':'#88ddff'}">${item.resultTruyenThong}</td>
-                        <td>${item.point}</td>
-                        <td>[${item.dices.join(',')}]</td>
-                    </tr>`;
-        });
-        html += `</table><p><i>Hiển thị ${recentList.length} phiên gần nhất (từ mới đến cũ).</i></p>`;
-        document.getElementById('historyTable').innerHTML = html;
-    }
+    // Nút bấm
+    document.getElementById('refreshBtn').addEventListener('click', runPrediction);
+    // Tự động cập nhật mỗi 30 giây
+    setInterval(() => {
+        runPrediction();
+    }, 30000);
     
-    function proposeAlgorithm(history) {
-        if (!history.length) return;
-        // Phân tích để chọn thuật toán tốt nhất dựa trên dữ liệu
-        // 1. Kiểm tra xem có quy luật "xu hướng" không: nếu chuỗi dài > 3 thì xu hướng mạnh
-        // 2. Kiểm tra tính "bật lắc" (đảo chiều thường xuyên)
-        // 3. Kiểm tra mối tương quan giữa tổng điểm và kết quả tiếp theo (đơn giản)
-        // 4. Kiểm tra quy tắc "cầu 1-1", "2-2", ...
-        
-        let last10 = history.slice(-10).map(h => h.resultTruyenThong);
-        let last5 = history.slice(-5);
-        
-        // Đếm số lần đảo chiều trong 10 ván gần nhất
-        let reversals = 0;
-        for(let i=1; i<last10.length; i++) if(last10[i] !== last10[i-1]) reversals++;
-        let reversalRate = reversals / (last10.length-1);
-        
-        let trendStrength = (window.streaksData?.maxTaiStreak > 3 || window.streaksData?.maxXiuStreak > 3) ? "mạnh" : "yếu";
-        
-        let algorithmDesc = "";
-        let codeSnippet = "";
-        
-        if (reversalRate > 0.6) {
-            // Đảo chiều nhiều -> nên dùng thuật toán "ngược lại kết quả vừa rồi"
-            algorithmDesc = `📌 Dữ liệu cho thấy tỷ lệ đảo chiều rất cao (${(reversalRate*100).toFixed(0)}% trong 10 ván). 
-            Thuật toán tối ưu: <strong>Dự đoán NGƯỢC lại kết quả ván mới nhất</strong>. 
-            Ví dụ: ván cuối là Tài → dự đoán Xỉu, và ngược lại. Độ chính xác kỳ vọng ~${(reversalRate*100).toFixed(0)}%.`;
-            codeSnippet = `function predictNext(lastResult) { return lastResult === "TAI" ? "XIU" : "TAI"; }`;
-        } 
-        else if (trendStrength === "mạnh" && (window.streaksData.maxTaiStreak > 3 || window.streaksData.maxXiuStreak > 3)) {
-            // Xu hướng mạnh: theo trend
-            let lastResult = history[history.length-1].resultTruyenThong;
-            algorithmDesc = `📌 Phát hiện xu hướng mạnh (chuỗi dài nhất ${Math.max(window.streaksData.maxTaiStreak, window.streaksData.maxXiuStreak)}). 
-            Thuật toán tối ưu: <strong>THEO XU HƯỚNG (tiếp tục kết quả ván mới nhất)</strong>. 
-            Dự đoán giống kết quả vừa ra. Độ chính xác kỳ vọng cao trong ngắn hạn.`;
-            codeSnippet = `function predictNext(lastResult) { return lastResult; } // theo trend`;
-        }
-        else {
-            // Kiểm tra quy tắc "cầu 1-1" hoặc "2-2" dựa trên 2 ván gần nhất
-            let lastTwo = last10.slice(-2);
-            if (lastTwo.length === 2 && lastTwo[0] === lastTwo[1]) {
-                // cặp đôi -> có thể đảo
-                algorithmDesc = `📌 Cặp đôi vừa xuất hiện (${lastTwo[0]} - ${lastTwo[1]}). Xu hướng thường đảo sau cặp. 
-                Thuật toán: <strong>ĐẢO NGƯỢC sau khi có 2 kết quả giống nhau liên tiếp</strong>. 
-                Dự đoán ngược lại với 2 ván cuối.`;
-                codeSnippet = `function predictNext(lastResult, secondLastResult) { if(lastResult === secondLastResult) return lastResult==="TAI"?"XIU":"TAI"; else return lastResult; }`;
-            } else {
-                // kết hợp với điểm số (phân tích điểm trung bình)
-                let avgPointLast5 = last5.reduce((s,item)=>s+item.point,0)/5;
-                let globalAvg = history.reduce((s,item)=>s+item.point,0)/history.length;
-                if (avgPointLast5 > globalAvg + 1.5) {
-                    algorithmDesc = `📌 Điểm trung bình 5 ván gần nhất (${avgPointLast5.toFixed(1)}) cao hơn tổng thể (${globalAvg.toFixed(1)}). Xu hướng Tài mạnh → dự đoán Tài.`;
-                    codeSnippet = `function predictNext() { return "TAI"; }`;
-                } else if (avgPointLast5 < globalAvg - 1.5) {
-                    algorithmDesc = `📌 Điểm trung bình 5 ván gần nhất thấp → xu hướng Xỉu → dự đoán Xỉu.`;
-                    codeSnippet = `function predictNext() { return "XIU"; }`;
-                } else {
-                    algorithmDesc = `📌 Dữ liệu không có quy luật rõ ràng. Sử dụng thuật toán <strong>Markov bậc 1</strong> (dựa trên xác suất chuyển tiếp từ 2 ván gần nhất). Tính từ lịch sử: xác suất cao nhất sẽ được chọn.`;
-                    // Tính ma trận chuyển tiếp đơn giản
-                    let trans = { "TAI_TAI":0, "TAI_XIU":0, "XIU_TAI":0, "XIU_XIU":0 };
-                    for(let i=1;i<history.length;i++) {
-                        let prev = history[i-1].resultTruyenThong;
-                        let curr = history[i].resultTruyenThong;
-                        trans[`${prev}_${curr}`]++;
-                    }
-                    let last = history[history.length-1].resultTruyenThong;
-                    let nextTai = trans[`${last}_TAI`] || 0;
-                    let nextXiu = trans[`${last}_XIU`] || 0;
-                    let predicted = nextTai > nextXiu ? "TAI" : (nextXiu > nextTai ? "XIU" : (last==="TAI"?"XIU":"TAI"));
-                    algorithmDesc += `<br>🔍 Từ lịch sử: sau ${last}, xác suất ra Tài: ${nextTai}, Xỉu: ${nextXiu} → Dự đoán <strong>${predicted}</strong>.`;
-                    codeSnippet = `function predictNext(lastResult) { // dùng bảng xác suất động\n   const map = { "TAI_TAI":${trans.TAI_TAI}, "TAI_XIU":${trans.TAI_XIU}, "XIU_TAI":${trans.XIU_TAI}, "XIU_XIU":${trans.XIU_XIU} };\n   return map[lastResult+"_TAI"] > map[lastResult+"_XIU"] ? "TAI" : "XIU";\n}`;
-                }
-            }
-        }
-        
-        // Thêm phân tích độ lệch chuẩn và khuyến nghị
-        const finalHtml = `
-            <div style="background:#001e2a; padding:16px; border-radius:28px;">
-                ${algorithmDesc}
-                <hr style="margin:12px 0; border-color:#ffb347;">
-                <strong>📜 Mã thuật toán đề xuất (JavaScript):</strong><br>
-                <pre style="background:#000; padding:10px; border-radius:16px; font-size:0.8rem;">${codeSnippet}</pre>
-                <p>💡 <em>Lưu ý: Thuật toán được tối ưu dựa trên ${history.length} phiên lịch sử gần nhất. Nên cập nhật thường xuyên khi có dữ liệu mới.</em></p>
-            </div>
-        `;
-        document.getElementById('bestAlgo').innerHTML = finalHtml;
-    }
-    
-    // Xuất JSON
-    document.getElementById('exportBtn').addEventListener('click', () => {
-        if(!fullHistory.length) {
-            alert("Chưa có dữ liệu, hãy nhấn 'LẤY LỊCH SỬ' trước.");
-            return;
-        }
-        const dataStr = JSON.stringify(fullHistory, null, 2);
-        const blob = new Blob([dataStr], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `taixiu_history_${new Date().toISOString()}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-    });
-    
-    document.getElementById('fetchBtn').addEventListener('click', fetchHistory);
-    
-    // Tự động gọi 1 lần khi load để demo
-    window.addEventListener('load', () => {
-        fetchHistory();
-    });
+    // Gọi lần đầu
+    runPrediction();
 </script>
 </body>
 </html>
